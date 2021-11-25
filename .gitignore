@@ -35,7 +35,8 @@ binaryFile/
 
 ### test ###
 /test/
-
+/test
+test/
 # Compiled class file
 *.class
 
