@@ -1,0 +1,1 @@
+mvn clean package exec:java -Dexec.classpathScope=compile

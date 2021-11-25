@@ -1,3 +1,42 @@
+!.mvn/wrapper/maven-wrapper.jar
+logs/
+*.db
+# Maven
+log/
+/target/
+target/
+dependency-reduced-pom.xml
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+### IntelliJ IDEA ###
+.idea
+.idea/
+/.idea/
+*.iws
+*.iml
+*.ipr
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+### VS Code ###
+.vscode/
+binaryFile/
+*.lock
+
+### test ###
+/test/
+/test
+test/
 # Compiled class file
 *.class
 
@@ -21,3 +60,4 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+

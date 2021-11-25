@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.itrustmachines</groupId>
+    <artifactId>bns-java-client</artifactId>
+    <version>${revision}</version>
+
+    <packaging>pom</packaging>
+
+    <name>ITM BNS Java Client</name>
+    <description>BNS Client, Java Version</description>
+
+    <organization>
+        <name>International Trust Machines Corporation</name>
+        <url>https://itrustmachines.com</url>
+    </organization>
+
+    <properties>
+        <revision>1.1.1-SNAPSHOT</revision>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>8</java.version>
+    </properties>
+
+    <modules>
+        <module>bns-client</module>
+        <module>itm-bns-sample</module>
+
+    </modules>
+
+</project>
