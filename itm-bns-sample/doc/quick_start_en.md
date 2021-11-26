@@ -2,12 +2,12 @@
 
 ### About Quick Starts
 
-Development for SDK require the following prerequisite:
+Development for BNS JAVA Client SDK require the following prerequisite:
 
-- An ITM SPO Java SDK
+- An BNS JAVA Client SDK
 - A machine running with Linux / MacOS / Windows 10
 
-Depending on your operating system, our SDK supports serveral development enviroments:
+Depending on your operating system, our SDK supports several development environments:
 
 - Visual Studio Code (VSCode) : You need to install [Java Extension Pack](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) for VSCode. This extension enables you to develop and execute our SDK in Linux, MacOS and Windows enviroments.
 
@@ -15,92 +15,66 @@ Depending on your operating system, our SDK supports serveral development enviro
 
 - IntelliJ IDEA
 
-The quickstarts are intended to guide you through the steps to install the software that SDK will need, configure the settings for Sample Code, and check the result after doing ledgerinput. Quick starts involved follwing steps:
+The quickstarts are intended to guide you through the steps to install the software that SDK will need, configure the settings for Sample Code, and check the result after doing ledgerinput. Quick starts involved following steps:
 
 <!-- no toc -->
-1. [Download the SDK](#1-download-the-sdk)
-2. [Install packages required to SDK](#2-install-packages-required-to-sdk)
-3. [Configure setting for SDK Sample Code](#3-configure-the-settings-for-sample-code)
+1. [Download the BNS JAVA Client SDK](#1-download-the-sdk)
+2. [Install packages required to BNS JAVA Client SDK](#2-install-packages-required-to-sdk)
+3. [Configure setting for Sample Code](#3-configure-the-settings-for-sample-code)
 4. [Run the Sample code](#4-run-the-sample-code)
 5. [Check the result](#5-check-the-result)
 
-Complete the quickstarts for each steps, then you will be ready to run the tutorial and develop our SDK with your own applications.
+Complete the quickstarts for each step, then you will be ready to run the tutorial and develop our SDK with your own applications.
 
 ### 1. Download the SDK
 
-To download the code, you will need to install git (If not installed yet) and then type
+To download the code, you will need to install [git](https://docs.github.com/en/get-started/quickstart/set-up-git) (If not installed yet) and then type
 
 ```shell
-> git clone https://github.com/itrustmachines/itm-spo-sdk-java.git
+> git clone https://github.com/itrustmachines/bns-java-client.git
 ```
 
 ### 2. Install packages required to SDK
 
 Before you run the SDK, you need to add required packages to your computer if they are not already installed. Depending on your operating systems, enter the following commands in terminal. You may omit packages that are already installed but make sure your java version is higher than 8, you can type `java --version` in terminal to check.
 
-- Please refer to [Java offical website](https://www.oracle.com/java/technologies/javase-downloads.html) to install or upgrade the Java
+- Please refer to [Java official website](https://www.oracle.com/java/technologies/javase-downloads.html) to install or upgrade the Java
 
-- Please refer to [Maven offical website](https://maven.apache.org) to install or upgrade the Maven
+- Please refer to [Maven official website](https://maven.apache.org) to install or upgrade the Maven
 
 ### 3. Configure the settings for Sample Code
 
-This configuration file is very important. Main program use this configuration file to initialize the SPO Client. Configuration file includes private key, blockchain address, server URL setting ... etc.
+This configuration file is very important. Main program use this configuration file to initialize the BNS Java Client. Configuration file includes private key, blockchain address, Email setting ... etc.
 
 Modifying the configuration file require the following prerequisites:
 
-1. Private key : To make sure the reliability of every data source, we need a unique private key to process digital signature for each data source. We provide the program to generate the private key. Please check the following commands
+1. Private key : To make sure the reliability of every data source, we need a unique private key to process digital signature for each data source. Please export you private key from MetaMask and private key in safe place. Anyone with your private key can access your MetaMask wallet.
 
-    Move to itm-spo-sdk-key-generator folder
+2. Rinkeby Blockchain Node URL : In order to get the On-Chain proof, we need to access the node of blockchain. We use Rinkeby blockchain for our testing environment. The Rinkeby blockchain node URL can obtain via Infura. Please check the [Infura tutorial](./infura_en.md) to get the Rinkey Node URL.
 
-    ```shell
-    > cd itm-spo-sdk-java/itm-spo-sdk-key-generator 
-    ```
-
-    Execute the code to generate the private key and keep the private key carefully
-
-    ```shell
-    > mvn clean install -DskipTests
-    > ./run_SpoKeyGenerator.sh
-    [INFO] Scanning for projects...
-    ...
-    ...
-    ...
-    [INFO] 
-    [INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ spo-sdk-key-generator ---
-    ### Copy and save the private key carefully ###
-    privateKey = .......
-    publicKey = 535d3e3b3e0eb7bbfe5f69068f25d64b4f8489510c0f4a25111016994d11f0cc4f4acb382d50a51eca9cd5f5bb1a14392613865ad0596144b700b078554ca4d3
-    clientWalletAddress = 0xdccc511e05023581ae4b563b93d31672cf3c7743
-    ```
-
-2. Rinkeby Blockchain Node URL : In order to get the onchain proof, we need to access the node of blockchain. We use Rinkeby blockchain for our testing enviroment. The Rinkeby blockchain node URL can obtain via Infura. Please check the [Infura tutorial](./infura_en.md) to get the Rinkey Node URL.
-
-After obtain the private key and Rinkeby Node URL, then you will be ready to modify the configuration file [sample.properties](../src/main/resources/sample.properties). Please check the file and follow the instructions in file or below.
+After obtaining the private key and Rinkeby Node URL, then you will be ready to modify the configuration file [sample.properties](../src/main/resources/sample.properties). Please check the file and follow the instructions in file or below.
 
 ```Java
 /**
  * Please fill in the 128 bits (32 bytes) Hex encoded
- * private key which generated by itm-spo-sdk-key-generator
+ * private key which you exported from MetaMask.
  */ 
 privateKey=
 
-/** 
- * Please fill in the index value of data source. 
- * The index value is the index of clearance. 
- * You can use device ID instead, if data source is coming from device.
- * But make sure the index value must be unique.
- */
-indexValueKey=
-
-/** Please fill in the URL of SPO Server */
-spoServerUrl=https://azure-prod-rinkeby.itm.monster:4430/
+/** Please fill in the URL of BNS Server */
+bnsServerUrl=https://azure-dev-membership.itm.monster:8088/
     
 /** 
- * Please fill in the Node URL of Rinkey which generated by Infura
+ * Please fill in the Rinkey Node URL which generated by Infura
  */
 nodeUrl=https://rinkeby.infura.io/v3/{InfuraProjectId}
 
-/** SPO Client will verify the receipt in the unit of page, you can change the number to set how many receipt will page to take and verify. We will discuss this setting in Tutorial document, you can keep this in default*/
+/**
+ * Please fill in your Email which you sign up for BNS Service.
+ */        
+email=
+        
+/** BNS Java Client will verify the receipt in the unit of page, you can change the number to set how many receipt will page to take and verify. We will discuss this setting in Tutorial document, you can keep this in default*/
 verifyBatchSize=10
 
 /** You can change the number to set how many second delay for each verification. We will discuss this setting in Tutorial document, you can keep this in default*/
@@ -113,68 +87,59 @@ retryDelaySec=5
 ### 4. Run the Sample Code
 
 #### Command Line Interface
-Move to itm-spo-sdk-sample folder
+Move to itm-bns-sample folder
 
 ```shell
-> cd itm-spo-sdk-java/itm-spo-sdk-sample
+> cd bns-java-client/itm-bns-sample
 ```
 
 Execute the program to start doing ledgerInput
 
 ```shell
-> mvn clean install -DskipTests
-> ./run_BnsClientSample.sh
+> mvn clean package
+> java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```
 
 #### Visual Studio Code
 
 1. Open Command Palette
 2. Type Maven and choose `Maven : Execute Commands`
-3. Choose itm-spo-sdk-sample project
-4. Choose Custom and type `clean package exec:java -Dexec.classpathScope=compile` 
-5. Press Enter
+3. Choose itm-bns-sample project
+4. Choose Custom and type `mvn clean package` to compile the code
+5. Execute the `./target/itm-bns-sample-1.1.1-SNAPSHOT.jar`
 
 #### Intellij IDEA
 
 1. Open itm-spo-sdk-java with Maven Project
-2. Build Project
-3. Click Run Anything
-4. Choose itm-spo-sdk-sample project
-5. Type `mvn clean package exec:java -Dexec.classpathScope=compile` and press Enter
+2. Click Maven Tool at right panel
+3. Click execute maven goal
+4. Type `mvn clean package` and press Enter to compile the code
+5. right click `itm-bns-sample-1.1.1-SNAPSHOT.jar` and click run `itm-bns-sample-1.1.1-SNAPSHOT.jar`
 
 ### 5. Check the result
 
-After excuting the sample code. The SPO Client will do ledgerinput. You can check the result of ledgerinput on ITM Dashbaord website.
+After executing the sample code. The BNS Java Client will start ledgerinput. You can check the result of ledgerinput on BNS Website.
 
-1. Use your Web Browser to open [ITM Dashboard](https://azure-prod-rinkeby.itm.monster:8443)
+1. Use your Web Browser to open [BNS Website](https://azure-dev-membership.itm.monster:8088/)
 
-2. Click the Device in the left side bar
+2. Click the Check Records then you can check all of your ledgerinput records
 
-3. Choose your data source in device list, the name of data source is `indexValueKey` that you type in [sample.properties](../src/main/resources/sample.properties)
+3. Click '+' in one of your legerinput records then you can view the information about ledgerinput.
 
-4. Move your mouse to CMD icon then you can view CMD contents.
-![cmd_content](../image/cmd_content.png)
+4. If your data is On-Chain, the Attest status icon will become green and show Success. Otherwise, it will be gray and show Waiting. The default setting of BNS Server is clearance once a day.
 
-5. If your data is onchain, the background of status icon will become green. Otherwise, it will be gray. The default setting of SPO Server is clearance every 200 ledgerinputs. You can let program keep doing ledgerinput until clearance.
-![onchain](../image/onchain.png)
-![offchain](../image/offchain.png)
+5. If your data is On-Chain, you can click On-chain Proof icon to view the proof on blockchain via blockchain browser.
 
-6. If your data is onchain, you can click On-chain Proof icon to view the proof on blockchain via blochchain browser.
+6. If your data is Off-Chain, you can click Off-chain Proof icon to download the proof and use our Verification Website or Verification Program SDK to verify this data whether be tampered.
 
-7. If your data is onchain, you can click Off-chain Proof icon to download the proof and use our Verification Server or Verification Program SDK to verify this data whether be tampered.
-![download_offchain](../image/download_offchain.png)
+7. Click the verification icon
 
-8. Click the verification server icon
-![verification_server](../image/verification_server.png)
+8. Click Blockchain verification
 
-9. Click Proof verification
-![proof_verification](../image/proof_verification.png)
+9. Upload the Off-chain proof your downloaded
 
-10. Upload the Off-chain proof your download before
-![upload_offchain](../image/upload_offchain.png)
+10. If Off-Chain proof is tempered-free, the Verify Result icon will become green, otherwise, it will be red.
 
-11. If Off-Chain proof is tempered-free, the verify result icon will become green, otherwise, it will be red.
-![verify_result](../image/verify_result.png)
 
 ----
 Quickstarts is now complete. Next, learn how to build your own CMD.

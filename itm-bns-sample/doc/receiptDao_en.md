@@ -2,7 +2,7 @@
 
 ### About the ReceiptDao
 
-The ReceiptDao ( Receipt Data Access Object ) is a interface which help developer to store, find, delete the receipt. Developer can implement the code in ReceiptDao to store the receipt in memory, database, cloud service or other services. In this document, we are going to store the receipt in database as a exmaple to guide you understand the ReceiptDao.
+The ReceiptDao ( Receipt Data Access Object ) is the interface which help developer to store, find, delete the receipt. Developer can implement the code in ReceiptDao to store the receipt in memory, database, cloud service or other services. In this document, we are going to store the receipt in database as an example to guide you understand the ReceiptDao.
 
 ### Prerequisites
 
@@ -10,21 +10,17 @@ The ReceiptDao ( Receipt Data Access Object ) is a interface which help develope
 - Complete the CMD document
 - Complete the Callback document
 
-### receiptDao methods
-
-![](../image/receipt_dao.png)
-
 #### jdbcUrl
 
-SPO Client will declare new receiptSerivice by creating database with `JDBC_URL`. Developers can configure the database name or path in `JDBC_URL`
+BNS Client will declare create a new database with `JDBC_URL`. Developers can configure the database name or path in `JDBC_URL`
 
-For the `JDBC_URL` setting, pleaser refer to [SpoClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java)
+For the `JDBC_URL` setting, pleaser refer to [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java)
 
 ```java
-public static String JDBC_URL = "jdbc:sqlite:SpoDevice.db";
+public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
 ```
 
-For the detail of creating receiptService, please refer to [SpoClientReceiptDao.java](../../spo-client/src/main/java/com/itrustmachines/client/todo/BnsClientReceiptDao.java)
+Then initialize the `receiptService` by database. For the code of initialize `receiptService`, please refer to [BnsClientReceiptDao.java](../../bns-client/src/main/java/com/itrustmachines/client/todo/BnsClientReceiptDao.java)
 
 ```java
 @SneakyThrows
@@ -35,9 +31,9 @@ ReceiptDaoSample(@NonNull final String jdbcUrl) {
 
 #### save
 
-After receiving the ledgerInputResponse / binaryLedgerInputResponse, SPO Client will call `handleReceiptEvent` method to extract the receipt from ledgerInputResponse / binaryLedgerInputResponse and call `save` method to save the receipt in database. Then the `save` method will call `save` method to access the database
+After receiving the ledgerInputResponse, BNS Client will call `handleReceiptEvent` method to extract the receipt from ledgerInputResponse and call `save` method to save the receipt in database.
 
-- For the the code of `handleReceiptEvent` method, please refer to [ReceiptEventProcessor.java](../../spo-client/src/main/java/com/itrustmachines/client/service/ReceiptEventProcessor.java)
+- For the code of `handleReceiptEvent` method, please refer to [ReceiptEventProcessor.java](../../bns-client/src/main/java/com/itrustmachines/client/service/ReceiptEventProcessor.java)
 
   ```java
   public void handleReceiptEvent(final @NonNull ReceiptEvent event) {
@@ -112,7 +108,7 @@ Instead of storing a receipt, Developers can choose to store the list of receipt
 
 #### findAll
 
-`findAll` method will find and return all of the receipt in database
+`findAll` method will find and return all the receipt in database
 
 - For the code of `findAll` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
   
@@ -139,7 +135,7 @@ Instead of storing a receipt, Developers can choose to store the list of receipt
 
 #### findAll
 
-Instead of finding all of the receipt, Developer can use this `findAll` method to find specific receipt by giving `pageNumber` and `pageSize`
+Instead of finding all the receipt, Developer can use this `findAll` method to find specific receipt by giving `pageNumber` and `pageSize`
 
 - For the code of `findAll` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
   
@@ -193,7 +189,7 @@ Instead of finding all of the receipt, Developer can use this `findAll` method t
 
 #### findByLocator
 
-`findByLocator` method can find out and return the receipt by giving `receiptLocator`. `receiptLocator` includes `indexValue` and `clearanceOrder`. SPO Client will use these two variables to find the receipt.
+`findByLocator` method can find out and return the receipt by giving `receiptLocator`. `receiptLocator` includes `indexValue` and `clearanceOrder`. BNS Client will use these two variables to find the receipt.
 
 - For the code of `findByLocator` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -223,7 +219,7 @@ Instead of finding all of the receipt, Developer can use this `findAll` method t
 
 #### findByLocators
 
-`findByLocators` method can find out and return the receipts by giving the list of `receiptLocators`. `receiptLocators` includes `indexValues` and `clearanceOrders`. SPO Client will use these two variables to find out the receipts.
+`findByLocators` method can find out and return the receipts by giving the list of `receiptLocators`. `receiptLocators` includes `indexValues` and `clearanceOrders`. BNS Client will use these two variables to find out the receipts.
 
 - For the code of `findByLocators` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -310,7 +306,7 @@ Instead of finding all of the receipt, Developer can use this `findAll` method t
 
 #### deleteAllByLocators
 
-`deleteAllByLocators` will delete the receipts by the list of `receiptLocators`. `receiptLocators` includes `indexValues` and `clearanceOrders`. SPO Client will use these two variables to delete the receipts.
+`deleteAllByLocators` will delete the receipts by the list of `receiptLocators`. `receiptLocators` includes `indexValues` and `clearanceOrders`. BNS Client will use these two variables to delete the receipts.
 
 - For the code of `deleteAllByLocators` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -337,9 +333,9 @@ Instead of finding all of the receipt, Developer can use this `findAll` method t
 
 #### getNeedVerifyReceiptLocatorMap
 
-- Before verifying the receipt, SPO Client will call `getNeedVerifyReceiptLocatorMap` method to find out which receipts need to be verified. The receipts which need to be verified  are `clearanceOrder` less than SPO Server `doneClearanceOrder`
+- Before verifying the receipt, BNS Client will call `getNeedVerifyReceiptLocatorMap` method to find out which receipts need to be verified. The receipts which need to be verified  are `clearanceOrder` less than BNS Server `doneClearanceOrder`
 
-- [SpoClientReceiptService.java](../../spo-client/src/main/java/com/itrustmachines/client/service/BnsClientReceiptService.java)
+- [BnsClientReceiptService.java](../../bns-client/src/main/java/com/itrustmachines/client/service/BnsClientReceiptService.java)
 
   ```java
   public Map<Long, Set<String>> getNeedVerifyReceiptLocatorMap(final long doneClearanceOrder) {
@@ -363,10 +359,10 @@ Instead of finding all of the receipt, Developer can use this `findAll` method t
   ```
 
 ----
-Build the ReceiptDao Applications document is now complete. Next, learn how to configure the remaining setting of SPO Client
+Build the ReceiptDao Applications document is now complete. Next, learn how to configure the remaining setting of BNS Client
 
 ## Next Steps
 
-Next Page : [Configure the Setting of SPO Client](./other_setting_en.md)
+Next Page : [Configure the Setting of BNS Client](./other_setting_en.md)
 Last Page : [Build the Callback Applications](./callback_en.md)
 
