@@ -48,9 +48,23 @@ This configuration file is very important. Main program use this configuration f
 
 Modifying the configuration file require the following prerequisites:
 
-1. Private key : To make sure the reliability of every data source, we need a unique private key to process digital signature for each data source. Please export you private key from MetaMask and private key in safe place. Anyone with your private key can access your MetaMask wallet.
+1. Create `settings.xml` in your .m2 folder and copy following setting into the file
 
-2. Rinkeby Blockchain Node URL : In order to get the On-Chain proof, we need to access the node of blockchain. We use Rinkeby blockchain for our testing environment. The Rinkeby blockchain node URL can obtain via Infura. Please check the [Infura tutorial](./infura_en.md) to get the Rinkey Node URL.
+```xml
+<settings>
+    <servers>
+        <server>
+            <id>kuro-nexus-releases</id>
+            <username>guest</username>
+            <password>guest</password>
+        </server>
+    </servers>
+</settings>
+```
+
+2. Private key : To make sure the reliability of every data source, we need a unique private key to process digital signature for each data source. Please export you private key from MetaMask and private key in safe place. Anyone with your private key can access your MetaMask wallet.
+
+3. Rinkeby Blockchain Node URL : In order to get the On-Chain proof, we need to access the node of blockchain. We use Rinkeby blockchain for our testing environment. The Rinkeby blockchain node URL can obtain via Infura. Please check the [Infura tutorial](./infura_en.md) to get the Rinkey Node URL.
 
 After obtaining the private key and Rinkeby Node URL, then you will be ready to modify the configuration file [sample.properties](../src/main/resources/sample.properties). Please check the file and follow the instructions in file or below.
 
@@ -87,8 +101,8 @@ retryDelaySec=5
 ### 4. Run the Sample Code
 
 #### Command Line Interface
-Move to itm-bns-sample folder
 
+Move to itm-bns-sample folder
 ```shell
 > cd bns-java-client/itm-bns-sample
 ```
