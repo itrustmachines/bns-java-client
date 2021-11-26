@@ -147,4 +147,4 @@ Quickstarts is now complete. Next, learn how to build your own CMD.
 ## Next Steps
 
 Next Page : [Build the CMD](./cmd_en.md)
-Last Page : [Home](../README.md)
+Last Page : [Home](../../README.md)

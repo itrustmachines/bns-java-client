@@ -110,5 +110,5 @@ Initialize the BNS Client with configuration file, callback and receiptDao. When
 
 The User Guide is now complete. If you have any problem about our SDK, please feel free to contact us.
 
-Next Page : [Home](../README.md)
+Next Page : [Home](../../README.md)
 Last Page : [Configure the Setting of BNS Client](./other_setting_en.md)
