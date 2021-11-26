@@ -91,5 +91,5 @@ Tutorials are now complete. Next, you can explore the overview of BNS Client
 
 ## Next Steps
 
-Next Page : [Overview of BNS Client](./summary_en.md)
+Next Page : [Overview of BNS Client](./summary_en.md)  
 Last Page : [Build the ReceiptDao Applications](./receiptDao_en.md)

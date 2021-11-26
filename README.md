@@ -1,6 +1,6 @@
 # ITM BNS JAVA Client SDK User Guide English Version
 
-[中文版](itm-bns-sample/README_ZH.md)
+[中文版](./README_ZH.md)
 
 ## Introduction
 

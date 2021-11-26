@@ -120,7 +120,7 @@ Execute the program to start doing ledgerInput
 
 After executing the sample code. The BNS Java Client will start ledgerinput. You can check the result of ledgerinput on BNS Website.
 
-1. Use your Web Browser to open [BNS Website](https://azure-dev-membership.itm.monster:8088/)
+1. Use your Web Browser to open [BNS Website](https://azure-dev-membership.itm.monster/)
 
 2. Click the Check Records then you can check all of your ledgerinput records
 
@@ -146,5 +146,5 @@ Quickstarts is now complete. Next, learn how to build your own CMD.
 
 ## Next Steps
 
-Next Page : [Build the CMD](./cmd_en.md)
+Next Page : [Build the CMD](./cmd_en.md)  
 Last Page : [Home](../../README.md)

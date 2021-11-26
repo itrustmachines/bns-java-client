@@ -15,7 +15,7 @@
 
 - 假設今天我們想將太陽能發電版的資訊傳送至 BNS Server 存證上鏈，我們必須把這些太陽能電板的資訊放在 CMD 的欄位，如下方範例程式所示。並透過 `Gson` 將資訊依照 JSON 格式儲存在 `cmdJSON` 中。
 
-- 此段程式在 [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java) 中，開發者可嘗試自行設計 CMD 內容，然後依照快速入門文件中的步驟執行程並前往[BNS Website](https://azure-dev-membership.itm.monster:8088/)查看您 ledgerinput 的結果。
+- 此段程式在 [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java) 中，開發者可嘗試自行設計 CMD 內容，然後依照快速入門文件中的步驟執行程並前往 [BNS Website](https://azure-dev-membership.itm.monster/) 查看您 ledgerinput 的結果。
 
 - [Cmd.java](../src/main/java/com/itrustmachines/sample/Cmd.java)
 
@@ -86,7 +86,7 @@
   ```
 
 1. 依照[快速入門文件](./quick_start_zh.md)中的步驟並使用 `java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar --file {filepath}` 執行程式
-2. 前往 [BNS Website](https://azure-dev-membership.itm.monster:8088/) 查看您 ledgerinput 的結果
+2. 前往 [BNS Website](https://azure-dev-membership.itm.monster/) 查看您 ledgerinput 的結果
 
 您現在已經了解如何設計 CMD 內容，下一部分，我們將會引導您將 BNS Client 程式執行中發生的事件串接您的系統中
 

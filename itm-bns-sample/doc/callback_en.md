@@ -213,5 +213,5 @@ Build the Callback Applications document is now complete. Next, learn how to bui
 
 ## Next Steps
 
-Next Page : [Build the ReceiptDao Applications](./receiptDao_en.md)
+Next Page : [Build the ReceiptDao Applications](./receiptDao_en.md)  
 Last Page : [Build the CMD](./cmd_en.md)

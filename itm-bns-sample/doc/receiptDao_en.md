@@ -363,6 +363,6 @@ Build the ReceiptDao Applications document is now complete. Next, learn how to c
 
 ## Next Steps
 
-Next Page : [Configure the Setting of BNS Client](./other_setting_en.md)
+Next Page : [Configure the Setting of BNS Client](./other_setting_en.md)  
 Last Page : [Build the Callback Applications](./callback_en.md)
 
