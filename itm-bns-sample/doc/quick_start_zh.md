@@ -110,7 +110,7 @@
   $ mvn clean package
   $ java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```
-
+**如果您的 Maven 版本高於 3.8.1 版，maven 預設會阻擋 HTTP repo，請參考 [此連結](https://stackoverflow.com/questions/67001968/how-to-disable-maven-blocking-external-http-repositores) 解決方式**
 #### Visual Studio Code
 
 1. 開啟命令例
