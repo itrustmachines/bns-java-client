@@ -114,6 +114,8 @@ Execute the program to start doing ledgerInput
 > java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```
 
+**If your Maven version is greater than 3.8.1, it will block the external HTTP repo. Please refer this [solution](https://stackoverflow.com/questions/67001968/how-to-disable-maven-blocking-external-http-repositores)**
+
 #### Visual Studio Code
 
 1. Open Command Palette
