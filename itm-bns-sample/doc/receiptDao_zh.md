@@ -2,21 +2,17 @@
 
 ### 關於 ReceiptDao 功能說明文件
 
-- ReceiptDao (Receipt Data Access Object) 的功能為存取回條並找出待驗證的回條，開發者可實作 ReceiptDao 將回條儲存在資料庫、雲端 ... 等其他服務中。在上一份文件中，您已經了解 Callback 的功能以及實作方式。在此份文件中，我們使用資料庫作為回條儲存地點引導您了解 SPO Client 如何透過 receiptDao 存取回條並找出待驗證的回條進行驗證
-
-### receiptDao 方法
-
-![](../image/receipt_dao.png)
+- ReceiptDao (Receipt Data Access Object) 的功能為存取回條並找出待驗證的回條，開發者可實作 ReceiptDao 將回條儲存在資料庫、雲端 ... 等其他服務中。在上一份文件中，您已經了解 Callback 的功能以及實作方式。在此份文件中，我們使用資料庫作為回條儲存地點引導您了解 BNS Client 如何透過 receiptDao 存取回條並找出待驗證的回條進行驗證
 
 #### jdbcUrl 說明
 
-此範例中，我們使用將回條儲存於資料庫之中，開發者可在 [SpoClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java) 中修改資料庫位址
+此範例中，我們使用將回條儲存於資料庫之中，開發者可在 [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java) 中修改資料庫位址
 
 ```java
-public static String JDBC_URL = "jdbc:sqlite:SpoDevice.db";
+public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
 ```
 
-在 [SpoClientReceiptDao.java](../../spo-client/src/main/java/com/itrustmachines/client/todo/BnsClientReceiptDao.java) 中，會根據 `jdbcUrl` 建立一個資料庫並作為後續 SPO Client 存取回條的存取位置
+在 [BnsClientReceiptDao.java](../../bns-client/src/main/java/com/itrustmachines/client/todo/BnsClientReceiptDao.java) 中，會根據 `jdbcUrl` 建立一個資料庫並作為後續 BNS Client 存取回條的存取位置
 
 ```java
 @SneakyThrows
@@ -27,9 +23,9 @@ ReceiptDaoSample(@NonNull final String jdbcUrl) {
 
 #### save 說明
 
-SPO Client 收到 `ledgerInputResponse / binaryLedgerInputResponse` 後，會呼叫 `handleReceiptEvent` 方法將回條從 `ledgerInputResponse / binaryLedgerInputResponse` 取出，並呼叫 `save` 方法儲存於資料庫
+BNS Client 收到 `ledgerInputResponse`  後，會呼叫 `handleReceiptEvent` 方法將回條從 `ledgerInputResponse` 取出，並透過 `save` 方法儲存於資料庫
 
-- 關於 `handleReceiptEvent` 方法的程式, 請參考 [ReceiptEventProcessor.java](../../spo-client/src/main/java/com/itrustmachines/client/service/ReceiptEventProcessor.java)
+- 關於 `handleReceiptEvent` 方法的程式, 請參考 [ReceiptEventProcessor.java](../../bns-client/src/main/java/com/itrustmachines/client/service/ReceiptEventProcessor.java)
 
   ```java
   public void handleReceiptEvent(final @NonNull ReceiptEvent event) {
@@ -185,7 +181,7 @@ SPO Client 收到 `ledgerInputResponse / binaryLedgerInputResponse` 後，會呼
 
 #### findByLocator 說明
 
-根據 `receiptLocator` 找出回條。`receiptLocator` 中包含 `indexValue` 和 `clearanceOrder`。SPO Client 會透過 `indexValue` 和 `clearanceOrder` 計算回條位置
+根據 `receiptLocator` 找出回條。`receiptLocator` 中包含 `indexValue` 和 `clearanceOrder`。BNS Client 會透過 `indexValue` 和 `clearanceOrder` 計算回條位置
 
 - 關於 `findByLocator` 方法的程式, 請參考 [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -215,7 +211,7 @@ SPO Client 收到 `ledgerInputResponse / binaryLedgerInputResponse` 後，會呼
 
 #### findByLocators 說明
 
-根據一個 list 的 `receiptLocator` 找出一個 list 的回條。`receiptLocator` 中包含 `indexValue` 和 `clearanceOrder`。SPO Client 會透過 `indexValue` 和 `clearanceOrder` 計算回條位置
+根據一個 list 的 `receiptLocator` 找出一個 list 的回條。`receiptLocator` 中包含 `indexValue` 和 `clearanceOrder`。BNS Client 會透過 `indexValue` 和 `clearanceOrder` 計算回條位置
 
 - 關於 `findByLocator` 方法的程式, 請參考 [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -302,7 +298,7 @@ SPO Client 收到 `ledgerInputResponse / binaryLedgerInputResponse` 後，會呼
 
 #### deleteAllByLocators 說明
 
-`deleteAllByLocators` 會根據一個 list 的 `receiptLocators` 刪除相對應的回條。SPO Client 會根據 `receiptLocators` 找出回條位置並刪除
+`deleteAllByLocators` 會根據一個 list 的 `receiptLocators` 刪除相對應的回條。BNS Client 會根據 `receiptLocators` 找出回條位置並刪除
 
 - 關於 `deleteAllByLocators` 方法的程式, 請參考 [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -329,9 +325,9 @@ SPO Client 收到 `ledgerInputResponse / binaryLedgerInputResponse` 後，會呼
 
 #### getNeedVerifyReceiptLocatorMap 說明
 
-- SPO Client 驗證回條前，會先呼叫 `getNeedVerifyReceiptLocatorMap` 尋找待驗證回條。待驗證回條為 clearanceOrder 小於目前 SPO Server 的 `doneClearanceOrder`
+- BNS Client 驗證回條前，會先呼叫 `getNeedVerifyReceiptLocatorMap` 尋找待驗證回條。待驗證回條為 clearanceOrder 小於目前 BNS Server 的 `doneClearanceOrder`
 
-- [SpoClientReceiptService.java](../../spo-client/src/main/java/com/itrustmachines/client/service/BnsClientReceiptService.java)
+- [BnsClientReceiptService.java](../../bns-client/src/main/java/com/itrustmachines/client/service/BnsClientReceiptService.java)
 
   ```java
   public Map<Long, Set<String>> getNeedVerifyReceiptLocatorMap(final long doneClearanceOrder) {
@@ -354,9 +350,9 @@ SPO Client 收到 `ledgerInputResponse / binaryLedgerInputResponse` 後，會呼
   }
   ```
 
-您現在已經了解 SPO Client receiptDao 的功能。接下來我們將引導您了解並調整 SPO Client 的其他設定
+您現在已經了解 BNS Client receiptDao 的功能。接下來我們將引導您了解並調整 BNS Client 的其他設定
 
 ----
 
-- [下一頁 : SPO Client 其他設定](./other_setting_zh.md)
+- [下一頁 : BNS Client 其他設定](./other_setting_zh.md)
 - [上一頁 : Callback 串接實作教學](./callback_zh.md)
