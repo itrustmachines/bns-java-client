@@ -4,8 +4,8 @@
 
 Development for BNS JAVA Client SDK require the following prerequisite:
 
-- An BNS JAVA Client SDK
-- A machine running with Linux / MacOS / Windows 10
+- An BNS Java Client SDK
+- A machine running with Linux / MacOS / Windows 10 / Windows 11
 
 Depending on your operating system, our SDK supports several development environments:
 
@@ -15,7 +15,7 @@ Depending on your operating system, our SDK supports several development environ
 
 - IntelliJ IDEA
 
-The quickstarts are intended to guide you through the steps to install the software that SDK will need, configure the settings for Sample Code, and check the result after doing ledgerinput. Quick starts involved following steps:
+The quickstarts are intended to guide you through the steps to install package required to SDK, configure the settings for Sample Code, and check the ledgerinput result. Quick starts involved following steps:
 
 <!-- no toc -->
 1. [Download the BNS JAVA Client SDK](#1-download-the-sdk)
@@ -36,7 +36,7 @@ To download the code, you will need to install [git](https://docs.github.com/en/
 
 ### 2. Install packages required to SDK
 
-Before you run the SDK, you need to add required packages to your computer if they are not already installed. Depending on your operating systems, enter the following commands in terminal. You may omit packages that are already installed but make sure your java version is higher than 8, you can type `java --version` in terminal to check.
+Before you run the SDK, you need to install **Java** and **Maven**. If you haven't installed the **Java** and **Maven**:
 
 - Please refer to [Java official website](https://www.oracle.com/java/technologies/javase-downloads.html) to install or upgrade the Java
 
@@ -48,25 +48,27 @@ This configuration file is very important. Main program use this configuration f
 
 Modifying the configuration file require the following prerequisites:
 
-1. Create `settings.xml` in your .m2 folder and copy following setting into the file
+1. Create `settings.xml` in your `.m2` folder and copy following setting into the `settings.xml` file.
 
-```xml
-<settings>
-    <servers>
-        <server>
-            <id>kuro-nexus-releases</id>
-            <username>guest</username>
-            <password>guest</password>
-        </server>
-    </servers>
-</settings>
-```
+    ```xml
+    <settings>
+        <servers>
+            <server>
+                <id>kuro-nexus-releases</id>
+                <username>guest</username>
+                <password>guest</password>
+            </server>
+        </servers>
+    </settings>
+    ```
 
-2. Private key : To make sure the reliability of every data source, we need a unique private key to process digital signature for each data source. Please export you private key from MetaMask and private key in safe place. Anyone with your private key can access your MetaMask wallet.
+2. Private key: To make sure the reliability of your each data source, you need a unique private key to process digital signature for each data source. Please export you private key from your MetaMask account and keep your private key in safe place. Anyone with your private key can access your MetaMask account.
 
-3. Rinkeby Blockchain Node URL : In order to get the On-Chain proof, we need to access the node of blockchain. We use Rinkeby blockchain for our testing environment. The Rinkeby blockchain node URL can obtain via Infura. Please check the [Infura tutorial](./infura_en.md) to get the Rinkey Node URL.
+3. Rinkeby Blockchain Node URL: In order to obtain the On-Chain proof, we need to access to  blockchain node. Therefore, we use Infura service help us access the blockchain node. In ITM BNS, we use Rinkeby blockchain for our testing environment. To obtain the Rinkey blockchain node URL, please refer to [Infura tutorial](./infura_en.md).
 
-After obtaining the private key and Rinkeby Node URL, then you will be ready to modify the configuration file [sample.properties](../src/main/resources/sample.properties). Please check the file and follow the instructions in file or below.
+4. ITM BNS Account: To use ITM BNS, You need to sign up to BNS, check `Sign Up` section in [BNS Tutorial](https://youtube.com/playlist?list=PL9mBKnNjNC1K0XiH9EL65QljN6Agf4k42) or [BNS User Guide](https://drive.google.com/file/d/1s1hDdHplzrEmnAIaja-rXJpPPq7eGlC5/view?usp=sharing) for more instruction.
+
+After finsihing the prerequisites, then you will be ready to modify the configuration file [sample.properties](../src/main/resources/sample.properties). Please check the configuration file and follow the instructions below.
 
 ```Java
 /**
@@ -88,10 +90,10 @@ nodeUrl=https://rinkeby.infura.io/v3/{InfuraProjectId}
  */        
 email=
         
-/** BNS Java Client will verify the receipt in the unit of page, you can change the number to set how many receipt will page to take and verify. We will discuss this setting in Tutorial document, you can keep this in default*/
+/** BNS Java Client verify the receipt in the unit of page, you can change the verifyBatchSize to set how many page of receipt will BNS to verify. We will introuduce this setting in Tutorial document, you can keep this in default*/
 verifyBatchSize=10
 
-/** You can change the number to set how many second delay for each verification. We will discuss this setting in Tutorial document, you can keep this in default*/
+/** You can change the verifyDelaySec to set how many second delay for each verification. We will discuss this setting in Tutorial document, you can keep this in default*/
 verifyDelaySec=1
 
 /** When failed ledgerinput occured, SPO Client will request again. You can change the number to set how many second delay for each retry. We will discuss this setting in Tutorial document, you can keep this in default*/
@@ -107,14 +109,14 @@ Move to itm-bns-sample folder
 > cd bns-java-client/itm-bns-sample
 ```
 
-Execute the program to start doing ledgerInput
+Execute the program to start ledgerInput
 
 ```shell
 > mvn clean package
 > java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```
 
-**If your Maven version is greater than 3.8.1, it will block the external HTTP repo. Please refer this [solution](https://stackoverflow.com/questions/67001968/how-to-disable-maven-blocking-external-http-repositores)**
+**If your Maven version is greater than 3.8.1, it will block the external HTTP repo. Please follow the [solution](https://stackoverflow.com/questions/67001968/how-to-disable-maven-blocking-external-http-repositores)** to solve your problem.
 
 #### Visual Studio Code
 
@@ -134,28 +136,25 @@ Execute the program to start doing ledgerInput
 
 ### 5. Check the result
 
-After executing the sample code. The BNS Java Client will start ledgerinput. You can check the result of ledgerinput on BNS Website.
+After executing the sample code. The BNS Java Client will start ledgerinput. You can check the ledgerinput result on BNS Website.
 
-1. Use your Web Browser to open [BNS Website](https://azure-dev-membership.itm.monster/)
+1. Visit [BNS Website](https://azure-dev-membership.itm.monster/)
 
-2. Click the Check Records then you can check all of your ledgerinput records
+2. Click the **Check Records** then you can check all of your ledgerinput records
 
-3. Click '+' in one of your legerinput records then you can view the information about ledgerinput.
+3. To view the ledgerinput detail information, click **+** in legerinput records
 
-4. If your data is On-Chain, the Attest status icon will become green and show Success. Otherwise, it will be gray and show Waiting. The default setting of BNS Server is clearance once a day.
+4. After the BNS service clear your attestation. Your ledgerinput records **Attest status** will show **Success**.
 
-5. If your data is On-Chain, you can click On-chain Proof icon to view the proof on blockchain via blockchain browser.
+5. If your **Attest status** is success, you can click **On-chain Proof** to view the proof on blockchain via blockchain browser or click **ITM Proof Token** to download the proof. The BNS server clear the attestation once a day. You will receive the email after BNS server clear your attestation.
 
-6. If your data is Off-Chain, you can click Off-chain Proof icon to download the proof and use our Verification Website or Verification Program SDK to verify this data whether be tampered.
+6. After you download the **ITM Proof Token**, you can click the **Verification** to visit our verification service to verify the proof.
 
-7. Click the verification icon
+7. Click **Blockchain verification** in our verification service.
 
-8. Click Blockchain verification
+8. Upload the  **ITM Proof Token** your downloaded.
 
-9. Upload the Off-chain proof your downloaded
-
-10. If Off-Chain proof is tempered-free, the Verify Result icon will become green, otherwise, it will be red.
-
+9. If Off-Chain proof is tempered-free, the Verify Result icon will become green, otherwise, it will be red.
 
 ----
 Quickstarts is now complete. Next, learn how to build your own CMD.
