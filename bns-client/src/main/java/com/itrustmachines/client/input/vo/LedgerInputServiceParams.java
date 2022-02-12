@@ -1,8 +1,8 @@
 package com.itrustmachines.client.input.vo;
 
+import com.itrustmachines.client.service.BnsClientReceiptService;
 import com.itrustmachines.client.service.ReceiptEventProcessor;
 import com.itrustmachines.client.service.ReceiptLocatorService;
-import com.itrustmachines.client.service.BnsClientReceiptService;
 import com.itrustmachines.client.todo.BnsClientCallback;
 import com.itrustmachines.client.verify.service.DoneClearanceOrderEventProcessor;
 import com.itrustmachines.common.vo.KeyInfo;

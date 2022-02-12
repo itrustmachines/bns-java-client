@@ -1,17 +1,20 @@
 package com.itrustmachines.client;
 
-import java.nio.file.Path;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.itrustmachines.client.config.BnsClientConfig;
 import com.itrustmachines.client.input.service.LedgerInputService;
 import com.itrustmachines.client.input.vo.LedgerInputResponse;
 import com.itrustmachines.client.input.vo.LedgerInputServiceParams;
+import com.itrustmachines.client.login.service.LoginService;
+import com.itrustmachines.client.register.service.BnsServerInfoService;
 import com.itrustmachines.client.register.service.RegisterService;
+import com.itrustmachines.client.service.BnsClientReceiptService;
 import com.itrustmachines.client.service.ReceiptEventProcessor;
 import com.itrustmachines.client.service.ReceiptLocatorService;
-import com.itrustmachines.client.service.BnsClientReceiptService;
-import com.itrustmachines.client.register.service.BnsServerInfoService;
 import com.itrustmachines.client.todo.BnsClientCallback;
 import com.itrustmachines.client.todo.BnsClientReceiptDao;
 import com.itrustmachines.client.verify.service.DoneClearanceOrderEventProcessor;
@@ -19,6 +22,7 @@ import com.itrustmachines.client.verify.service.MerkleProofService;
 import com.itrustmachines.client.verify.service.ObtainDoneClearanceOrderService;
 import com.itrustmachines.client.verify.vo.DoneClearanceOrderEvent;
 import com.itrustmachines.client.vo.BnsServerInfo;
+import com.itrustmachines.client.vo.ClientInfo;
 import com.itrustmachines.common.ethereum.service.ClientContractService;
 import com.itrustmachines.common.util.KeyInfoUtil;
 import com.itrustmachines.common.vo.KeyInfo;
@@ -38,13 +42,17 @@ public class BnsClient {
   @Getter(AccessLevel.PUBLIC)
   private final BnsClientConfig config;
   private final KeyInfo keyInfo;
+  @Getter(AccessLevel.PUBLIC)
+  private final ClientInfo clientInfo;
+  @Getter(AccessLevel.PUBLIC)
   private final BnsServerInfo bnsServerInfo;
-
+  
   @Getter(AccessLevel.PUBLIC)
   private final BnsClientReceiptService bnsClientReceiptService;
   private final ReceiptLocatorService receiptLocatorService;
   
   private final RegisterService registerService;
+  private final LoginService loginService;
   private final BnsServerInfoService bnsServerInfoService;
   
   // ledger input and process receipt
@@ -56,6 +64,7 @@ public class BnsClient {
   private final ObtainDoneClearanceOrderService obtainDoneClearanceOrderService;
   private final MerkleProofService merkleProofService;
   private final DoneClearanceOrderEventProcessor doneClearanceOrderEventProcessor;
+  private final ExecutorService executorService;
   
   private BnsClient(BnsClientConfig config, BnsClientCallback callback, BnsClientReceiptDao receiptDao) {
     this.config = config;
@@ -63,7 +72,9 @@ public class BnsClient {
     
     this.bnsClientReceiptService = new BnsClientReceiptService(receiptDao);
     this.receiptLocatorService = new ReceiptLocatorService(config.getBnsServerUrl(), config.getRetryDelaySec());
-    this.registerService = new RegisterService(config.getBnsServerUrl(), callback, keyInfo, config.getRetryDelaySec(), config.getEmail());
+    this.registerService = new RegisterService(config.getBnsServerUrl(), callback, keyInfo, config.getRetryDelaySec(),
+        config.getEmail());
+    this.loginService = new LoginService(config.getBnsServerUrl(), keyInfo, config.getRetryDelaySec());
     this.bnsServerInfoService = new BnsServerInfoService(config.getBnsServerUrl(), config.getRetryDelaySec());
     
     this.obtainDoneClearanceOrderService = new ObtainDoneClearanceOrderService(config.getBnsServerUrl(),
@@ -71,14 +82,28 @@ public class BnsClient {
     this.merkleProofService = new MerkleProofService(config.getBnsServerUrl(), callback, config.getRetryDelaySec());
     
     this.receiptEventProcessor = new ReceiptEventProcessor(callback, bnsClientReceiptService);
-
+    
+    boolean isRegistered = registerService.checkRegister();
+    
+    if (!isRegistered) {
+      log.debug("BnsClient not registered");
+      isRegistered = registerService.register();
+      if (!isRegistered) {
+        String errMsg = "BnsClient register fail";
+        log.error("init() error, {}", errMsg);
+        throw new RuntimeException(errMsg);
+      }
+    }
+    
+    this.clientInfo = loginService.login();
+    
     this.bnsServerInfo = obtainBnsServerInfo(config.getBnsServerUrl());
-
+    
     final ClientContractService clearanceRecordService = obtainClearanceRecordService(config, bnsServerInfo);
     this.verifyService = new VerifyReceiptAndMerkleProofService();
     this.doneClearanceOrderEventProcessor = new DoneClearanceOrderEventProcessor(callback, bnsClientReceiptService,
         merkleProofService, verifyService, clearanceRecordService, bnsServerInfo.getServerWalletAddress(),
-        config.getVerifyBatchSize(), config.getVerifyDelaySec(), keyInfo);
+        config.getVerifyBatchSize(), config.getVerifyDelaySec());
     
     final LedgerInputServiceParams params = LedgerInputServiceParams.builder()
                                                                     .keyInfo(keyInfo)
@@ -92,12 +117,13 @@ public class BnsClient {
                                                                     .retryDelaySec(config.getRetryDelaySec())
                                                                     .build();
     this.ledgerInputService = new LedgerInputService(params);
+    this.executorService = Executors.newSingleThreadExecutor();
     log.info("new instance={}", this);
   }
-
+  
   private BnsServerInfo obtainBnsServerInfo(@NonNull final String bnsServerUrl) {
     BnsServerInfoService serverInfoService = new BnsServerInfoService(bnsServerUrl, config.getRetryDelaySec());
-    final BnsServerInfo bnsServerInfo = serverInfoService.postBnsServerInfo( keyInfo );
+    final BnsServerInfo bnsServerInfo = serverInfoService.postBnsServerInfo(keyInfo);
     log.debug("obtainBnsServerInfo() bnsServerInfo={}", bnsServerInfo);
     return bnsServerInfo;
   }
@@ -119,34 +145,18 @@ public class BnsClient {
   
   public static BnsClient init(@NonNull final BnsClientConfig config, @NonNull final BnsClientCallback callback,
       @NonNull final BnsClientReceiptDao receiptDao) {
-
+    
     log.debug("BnsClient init() start, config={}", config);
     if (config.getVerifyBatchSize() <= 0) {
       config.setVerifyBatchSize(BnsClientConfig.DEFAULT_VERIFY_BATCH_SIZE);
     }
     BnsClient bnsClient = new BnsClient(config, callback, receiptDao);
-
-    boolean isRegistered =  bnsClient.registerService.checkRegister();
-
-    if ( !isRegistered ){
-      log.debug("BnsClient not registered");
-      isRegistered = bnsClient.registerService.register();
-      if (!isRegistered) {
-        bnsClient.close();
-        String errMsg = "BnsClient register fail";
-        log.error("init() error, {}", errMsg);
-        throw new RuntimeException(errMsg);
+    bnsClient.executorService.submit(() -> {
+      while (true) {
+        TimeUnit.MINUTES.sleep(20);
+        bnsClient.loginService.login();
       }
-    }
-
-    KeyInfo keyInfo = KeyInfoUtil.buildKeyInfo(config.getPrivateKey());
-    if (bnsClient.bnsServerInfoService.postBnsServerInfo( keyInfo ) == null) {
-      bnsClient.close();
-      String errMsg = "BnsClient postBnsServerInfo fail";
-      log.error("init() error, {}", errMsg);
-      throw new RuntimeException(errMsg);
-    }
-
+    });
     log.debug("BnsClient init() end, bnsClient={}", bnsClient);
     return bnsClient;
   }
@@ -158,13 +168,13 @@ public class BnsClient {
   public LedgerInputResponse ledgerInput(@NonNull final String cmdJson) {
     return ledgerInputService.ledgerInput(keyInfo, cmdJson);
   }
-
+  
   // TODO verify by polling doneCO
   
   public void verifyNow() {
     log.debug("verifyNow() start");
-
-    final long doneCO = obtainDoneClearanceOrderService.postDoneClearanceOrder( keyInfo );
+    
+    final long doneCO = obtainDoneClearanceOrderService.postDoneClearanceOrder();
     doneClearanceOrderEventProcessor.process(DoneClearanceOrderEvent.builder()
                                                                     .source(DoneClearanceOrderEvent.Source.DIRECT_CALL)
                                                                     .doneClearanceOrder(doneCO)

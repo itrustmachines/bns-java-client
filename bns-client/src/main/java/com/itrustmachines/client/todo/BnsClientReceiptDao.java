@@ -12,7 +12,7 @@ public interface BnsClientReceiptDao {
   boolean saveAll(List<Receipt> receipts);
   
   List<Receipt> findAll();
-
+  
   List<Receipt> findAll(int pageNumber, int pageSize);
   
   long countAll();

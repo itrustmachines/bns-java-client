@@ -1,8 +1,8 @@
-## Build the ReceiptDao Applications
+## Build thte ReceiptDao Applications
 
 ### About the ReceiptDao
 
-The ReceiptDao ( Receipt Data Access Object ) is the interface which help developer to store, find, delete the receipt. Developer can implement the code in ReceiptDao to store the receipt in memory, database, cloud platform or other services. In this document, we store the receipt in local database as an example to guide you understand the ReceiptDao.
+The ReceiptDao ( Receipt Data Access Object ) is the interface which help developer to store, find, delete the receipt. Developer can implement the code in ReceiptDao to store the receipt in memory, database, cloud service or other services. In this document, we are going to store the receipt in database as an example to guide you understand the ReceiptDao.
 
 ### Prerequisites
 
@@ -12,7 +12,7 @@ The ReceiptDao ( Receipt Data Access Object ) is the interface which help develo
 
 #### jdbcUrl
 
-BNS Client will create a new database with `JDBC_URL`. Developers can configure the database name or path in `JDBC_URL`
+BNS Client will declare create a new database with `JDBC_URL`. Developers can configure the database name or path in `JDBC_URL`
 
 For the `JDBC_URL` setting, pleaser refer to [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java)
 
@@ -20,11 +20,36 @@ For the `JDBC_URL` setting, pleaser refer to [BnsClientSample.java](../src/main/
 public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
 ```
 
+Then initialize the `receiptService` by database. For the code of initialize `receiptService`, please refer to [BnsClientReceiptDao.java](../../bns-client/src/main/java/com/itrustmachines/client/todo/BnsClientReceiptDao.java)
+
+```java
+@SneakyThrows
+ReceiptDaoSample(@NonNull final String jdbcUrl) {
+  this.receiptService = new ReceiptService(new JdbcPooledConnectionSource(jdbcUrl));
+}
+```
+
 #### save
 
-`save` method allows developers save the receipt after BNS Java Client extract receipt from `ledgerInputResponse`.
+After receiving the ledgerInputResponse, BNS Client will call `handleReceiptEvent` method to extract the receipt from ledgerInputResponse and call `save` method to save the receipt in database.
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `handleReceiptEvent` method, please refer to [ReceiptEventProcessor.java](../../bns-client/src/main/java/com/itrustmachines/client/service/ReceiptEventProcessor.java)
+
+  ```java
+  public void handleReceiptEvent(final @NonNull ReceiptEvent event) {
+    log.debug("handleReceiptEvent() begin, event={}", event);
+    try {
+      callback.obtainReceiptEvent(event);
+    } catch (Exception e) {
+      ...
+      ...
+    }
+    final boolean isReceiptSaved = receiptService.save(event.getReceipt());
+    log.debug("handleReceiptEvent() end, isReceiptSaved={}", isReceiptSaved);
+  }
+  ```
+
+- For the code of `save` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
   ```java
   @Override
@@ -40,11 +65,26 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  private ReceiptEntity save(@NonNull final ReceiptEntity receiptEntity) {
+    sigClientDao.createIfNotExists(receiptEntity.getSigClient());
+    sigServerDao.createIfNotExists(receiptEntity.getSigServer());
+    return receiptDao.createIfNotExists(receiptEntity);
+  }
+  
+  public Receipt save(@NonNull final Receipt receipt) {
+    final ReceiptEntity createEntity = save(ReceiptUtil.toEntity(receipt));
+    return ReceiptUtil.toDomain(createEntity);
+  }
+  ```
+
 #### saveAll
 
-`saveAll` methods allows developers save a list of receipt after BNS Java Client extract receipt from `ledgerInputResponse`.
+Instead of storing a receipt, Developers can choose to store the list of receipts in database. The procedure of `saveAll` is as same as `save`.
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `saveAll` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
   ```java
   @Override
@@ -56,11 +96,21 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  public List<Receipt> saveAll(@NonNull final List<Receipt> receipts) {
+    return receipts.stream()
+                   .map(this::save)
+                   .collect(Collectors.toList());
+  }
+  ```
+
 #### findAll
 
-`findAll` method allows developers find and return all the receipt in database
+`findAll` method will find and return all the receipt in database
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `findAll` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
   
   ```java
   @Override
@@ -72,11 +122,22 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+  
+  ```java
+  public List<Receipt> findAll() {
+    return receiptDao.queryForAll()
+                     .stream()
+                     .map(ReceiptUtil::toDomain)
+                     .collect(Collectors.toList());
+  }
+  ```
+
 #### findAll
 
-`findAll` methods with arguments allows developers find specific receipt by giving `pageNumber` and `pageSize` arguments. BNS Java Client will calculate the offset by `pageNumber` x `pageSize` and use offset to find the receipt.
+Instead of finding all the receipt, Developer can use this `findAll` method to find specific receipt by giving `pageNumber` and `pageSize`
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `findAll` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
   
   ```java
   @Override
@@ -88,11 +149,25 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+  
+  ```java
+  public List<Receipt> findAll(final int pageNumber, final int pageSize) {
+    final QueryBuilder<ReceiptEntity, Long> queryBuilder = receiptDao.queryBuilder();
+    queryBuilder.offset((long) (pageNumber * pageSize))
+                .limit((long) pageSize);
+    return queryBuilder.query()
+                       .stream()
+                       .map(ReceiptUtil::toDomain)
+                       .collect(Collectors.toList());
+  }
+  ```
+
 #### countAll
 
-`countAll` method return current count of receipt.
+`countAll` method wil count and return the number of receipt in database
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `countAll` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
   ```java
   @Override
@@ -104,9 +179,17 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  public long countAll() {
+    return receiptDao.countOf();
+  }
+  ```
+
 #### findByLocator
 
-`findByLocator` method allows developers find the receipt by giving `receiptLocator`. `receiptLocator` includes `indexValue` and `clearanceOrder`. BNS Java Client will locate the receipt by `indexValue` and `clearanceOrder`.
+`findByLocator` method can find out and return the receipt by giving `receiptLocator`. `receiptLocator` includes `indexValue` and `clearanceOrder`. BNS Client will use these two variables to find the receipt.
 
 - For the code of `findByLocator` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -120,12 +203,25 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  public Receipt findByLocator(@NonNull final ReceiptLocator receiptLocator) {
+    final QueryBuilder<ReceiptEntity, Long> queryBuilder = receiptDao.queryBuilder();
+    queryBuilder.where()
+                .eq(ReceiptEntity.CLEARANCE_ORDER_KEY, receiptLocator.getClearanceOrder())
+                .and()
+                .eq(ReceiptEntity.INDEX_VALUE_KEY, receiptLocator.getIndexValue());
+    final ReceiptEntity entity = queryBuilder.queryForFirst();
+    return ReceiptUtil.toDomain(entity);
+  }
+  ```
+
 #### findByLocators
 
-`findByLocators` method allows developers find a list of receipt by giving the list of `receiptLocator`.
-`receiptLocator` includes `indexValue` and `clearanceOrder`. BNS Java Client will locate the receipt by `indexValue` and `clearanceOrder`.
+`findByLocators` method can find out and return the receipts by giving the list of `receiptLocators`. `receiptLocators` includes `indexValues` and `clearanceOrders`. BNS Client will use these two variables to find out the receipts.
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `findByLocators` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
   ```java
   @Override
@@ -137,11 +233,21 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  public List<Receipt> findByLocators(@NonNull final List<ReceiptLocator> receiptLocators) {
+    return receiptLocators.stream()
+                          .map(this::findByLocator)
+                          .collect(Collectors.toList());
+  }
+  ```
+
 #### delete
 
-`delete` method allows developers delete the receipt.
+`delete` method will extract the `indexvalue` and `clearanceOrder` from receipt and calling `deleteByLocator` to delete the receipt.
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `delete` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
   ```java
   @Override
@@ -157,11 +263,25 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  public int deleteByLocator(@NonNull final ReceiptLocator receiptLocator) {
+    DeleteBuilder<ReceiptEntity, Long> deleteBuilder = receiptDao.deleteBuilder();
+    deleteBuilder.where()
+                 .eq(ReceiptEntity.INDEX_VALUE_KEY, receiptLocator.getIndexValue())
+                 .and()
+                 .eq(ReceiptEntity.CLEARANCE_ORDER_KEY, receiptLocator.getClearanceOrder());
+    PreparedDelete<ReceiptEntity> preparedDelete = deleteBuilder.prepare();
+    return receiptDao.delete(preparedDelete);
+  }
+  ```
+
 #### deleteAll
 
-`delete` method allows developers delete a list of receipt.
+`deleteAll` method will delete list of receipt
 
-- [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
+- For the code of `deleteAll` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
   ```java
   @Override
@@ -173,10 +293,20 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  public int deleteAll() {
+    final DeleteBuilder<ReceiptEntity, Long> deleteBuilder = receiptDao.deleteBuilder();
+    deleteBuilder.where();
+    final PreparedDelete<ReceiptEntity> preparedDelete = deleteBuilder.prepare();
+    return receiptDao.delete(preparedDelete);
+  }
+  ```
+
 #### deleteAllByLocators
 
-`deleteAllByLocators` method allows developers delete a list of receipts by giving a list of `receiptLocator`.
-`receiptLocator` includes `indexValue` and `clearanceOrder`. BNS Client will use `indexValue` and `clearanceOrder` to find and delete the receipts.
+`deleteAllByLocators` will delete the receipts by the list of `receiptLocators`. `receiptLocators` includes `indexValues` and `clearanceOrders`. BNS Client will use these two variables to delete the receipts.
 
 - For the code of `deleteAllByLocators` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -190,9 +320,20 @@ public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
   }
   ```
 
+- For the code of database access, please refer to [ReceiptService.java](../src/main/java/com/itrustmachines/sample/ReceiptService.java)
+
+  ```java
+  public int deleteByLocatorList(@NonNull final List<ReceiptLocator> receiptLocators) {
+    return receiptLocators.stream()
+                          .map(this::deleteByLocator)
+                          .reduce(Integer::sum)
+                          .orElse(0);
+  }
+  ```
+
 #### getNeedVerifyReceiptLocatorMap
 
-`getNeedVerifyReceiptLocatorMap` method allows BNS Client find out the receipts need to be verified. BNS Client will verify the receipt, if the receipt's `clearanceOrder` is less than `doneClearanceOrder`  
+- Before verifying the receipt, BNS Client will call `getNeedVerifyReceiptLocatorMap` method to find out which receipts need to be verified. The receipts which need to be verified  are `clearanceOrder` less than BNS Server `doneClearanceOrder`
 
 - [BnsClientReceiptService.java](../../bns-client/src/main/java/com/itrustmachines/client/service/BnsClientReceiptService.java)
 
@@ -224,3 +365,4 @@ Build the ReceiptDao Applications document is now complete. Next, learn how to c
 
 Next Page : [Configure the Setting of BNS Client](./other_setting_en.md)  
 Last Page : [Build the Callback Applications](./callback_en.md)
+

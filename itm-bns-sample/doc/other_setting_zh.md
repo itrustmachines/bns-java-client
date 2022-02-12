@@ -82,7 +82,6 @@ BNS Client 會透過 `PROP_PATH_LIST` 中的路徑尋找設定檔。 如果您�
 若 BNS Client 與 BNS Server 溝通失敗，會進行重新嘗試溝通，可在 `RetryDelaySec` 設定每次重試延遲秒數
 
 ----
-您現在已經了解如何調整 BNS Client 其他設定，接下來們將引導您了解 BNS 資料夾自動存證完整的運作流程
+您現在已經了解如何調整 BNS Client 其他設定，接下來們將引導您了解 BNS 資料夾檔案自動存證
 
-- [下一頁 : BNS 資料夾自動存證](./bns-auto-folder-attest_zh.md)
-- [上一頁 : ReceiptDao 教學](./receiptDao_zh.md)
+- [下一頁 : BNS 資料夾檔案自動存證](../../bns-auto-folder-attest/doc/bns-auto-folder-attest_zh.md)

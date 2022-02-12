@@ -8,15 +8,15 @@ import com.google.gson.Gson;
 import com.itrustmachines.client.input.vo.LedgerInputRequest;
 import com.itrustmachines.client.input.vo.LedgerInputResponse;
 import com.itrustmachines.client.input.vo.LedgerInputServiceParams;
+import com.itrustmachines.client.service.BnsClientReceiptService;
 import com.itrustmachines.client.service.ReceiptEventProcessor;
 import com.itrustmachines.client.service.ReceiptLocatorService;
-import com.itrustmachines.client.service.BnsClientReceiptService;
 import com.itrustmachines.client.todo.BnsClientCallback;
+import com.itrustmachines.client.util.OkHttpClientUtil;
 import com.itrustmachines.client.verify.service.DoneClearanceOrderEventProcessor;
 import com.itrustmachines.client.verify.vo.DoneClearanceOrderEvent;
 import com.itrustmachines.client.vo.ReceiptEvent;
 import com.itrustmachines.common.constants.StatusConstants;
-import com.itrustmachines.common.util.OkHttpClientUtil;
 import com.itrustmachines.common.util.UrlUtil;
 import com.itrustmachines.common.vo.KeyInfo;
 import com.itrustmachines.common.vo.ReceiptLocator;
@@ -25,13 +25,17 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @ToString
 @Slf4j
 public class LedgerInputService {
   
-  private static final String API_PATH = "/ledger/input";
+  private static final String API_PATH = "/input";
   
   private static final int MAX_RESEND_TIMES = 5;
   
@@ -58,9 +62,9 @@ public class LedgerInputService {
     this.doneClearanceOrderEventProcessor = params.getDoneClearanceOrderEventProcessor();
     this.receiptEventProcessor = params.getReceiptEventProcessor();
     this.retryDelaySec = params.getRetryDelaySec();
-    
     this.okHttpClient = OkHttpClientUtil.getOkHttpClient();
     this.gson = new Gson();
+    
     log.info("new instance={}", this);
   }
   
@@ -76,7 +80,7 @@ public class LedgerInputService {
       log.debug("ledgerInput() resendCount={}", resendCount);
       try {
         // build LedgerInput by cmdJson
-        locator = receiptLocatorService.postReceiptLocator( keyInfo);
+        locator = receiptLocatorService.postReceiptLocator(keyInfo);
         ledgerInputRequest = buildLedgerInputRequest(locator, cmdJson);
         try {
           callback.createLedgerInputByCmd(locator, ledgerInputRequest);

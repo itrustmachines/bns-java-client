@@ -2,34 +2,33 @@
 
 ### About the Callback
 
-In this document, we will teach you how to develop the Callbacks method to help you intergrate our BNS SDK with your applicaitons or systems. BNS Java Client will call APIs to interact with BNS server. We provide the 7 Callback methods to return each APIs request or response. We will introuduce these Callback methods in following documents.
-
-Before starting to go throught the documents. you can refer to [BNS API Doc](https://azure-dev-membership.itm.monster/api) to learn basic API informations.
+The Callbacks send the API events which occurs between BNS Client and BNS Server to your system. We define 7 events that you can callback. We will introduce these Callbacks in the following document.
+You can go through BNS API Doc [here](https://azure-dev-membership.itm.monster/api)
 
 ### Prerequisites
-
 - Complete quickstarts document
 - Complete build the CMD document
 
-### Callback methods
+### Events
 
-1. `register` : When initialize the BNS Client, BNS Client will call `Confirm wallet address API` to check whether your MetaMask wallet address has been successfully registered with in ITM BNS. Developers can implement the code in `register` method to return the `registerRequest` and `registerResult`.
+1. `register` : When initialize the BNS Client, BNS Client will send `registerRequest` to BNS Server and receive `registerResult` from BNS Server. Developers can implement the code in `register` method to callback the information in `registerRequest` and `registerResult`.
 
-2. `createLedgerInputByCmd` : After successfully initialize the BNS Client, BNS Client will build `ledgerInputRequest` with `CMD` and other informations. Developers can implement the code in `createLedgerInputByCmd` method to callback the `ledgerInputRequest`.
+2. `createLedgerInputByCmd` : After successfully initializing the BNS Client, BNS Client will store CMD and other data in `ledgerInputRequest` and do **ledgerInput** to send `ledgerInputRequest` to the BNS Server. Developers can implement the code in `createLedgerInputByCmd` method to callback the information in `ledgerInputRequest`.
 
-3. `obtainLedgerInputResponse` : BNS Client will receive `ledgerInputResponse` from BNS Server after sending the `ledgerInput`. Developers can implement the code in `obtainLedgerInputResponse` method to callback the `ledgerInputResponse`.
+3. `obtainLedgerInputResponse` : BNS Client will receive `ledgerInputResponse` from BNS Server after sending `ledgerInputRequest`. Developers can implement the code in `obtainLedgerInputResponse` method to callback the information in `ledgerInputResponse`.
 
-4. `obtainReceiptEvent` : The `receipt` is contained in `ledgerInputResponse`. BNS will use receipt to verify the verification proof. Developers can implement the code in `obtainReceiptEvent` method to callback the `receipt`.
+4. `obtainReceiptEvent` : The `receipt` is contained in `ledgerInputResponse`. Developers can implement the code in `obtainReceiptEvent` method to callback the information in `receipt`.
 
-5. `obtainDoneClearanceOrderEvent` : The `doneClearanceOrder` is contained in `ledgerInputResponse`. BNS Client will use `doneClearanceOrder` to find out which receipts need to be verified. Developers can implement the code in `obtainDoneClearanceOrderEvent` method to callback the `doneClearanceOrder`.
+5. `obtainDoneClearanceOrderEvent` : The `doneClearanceOrder` is contained in `ledgerInputResponse`. BNS Client will use `doneClearanceOrder` to find out which receipts need to be verified. Developers can implement the code in `obtainDoneClearanceOrderEvent` method to callback the information in `doneClearanceOrder`.
 
-6. `obtainMerkleProof` : Before verifying the receipt, BNS Client will call `Get Merkle proof API` to request the `merkleProof` of those to be verified receipts from the BNS Server. The Merkle Proof is evidence of receipt verification. BNS Client will use Merkle proof to verify the receipt whether the receipt is in the TP-merkle tree. Developers can implement the code in `obtainMerkleProof` method to callback the `merkleProof`.
+6. `obtainMerkleProof` : Before verifying the receipt, BNS Client will request the `merkleProof` of those to be verified receipts from the Server. The Merkle Proof is evidence of receipt verification. BNS Client will use Merkle proof to verify the receipt whether receipt is in the TP-merkle tree. Developers can implement the code in `obtainMerkleProof` method to callback the information in `merkleProof`.
 
-7. `getVerifyReceiptResult` : After receiving the Merkle Proof. BNS Client will start to verify the receipt then store the verification result into `verifyReceiptResult`. Developers can implement the code in `getVerifyReceiptResult` method to callback the `verifyReceiptResult`.
+7. `getVerifyReceiptResult` : After receiving the Merkle Proof. BNS Client will start to verify the receipt and store the result to `verifyReceiptResult`. Developers can implement the code in `getVerifyReceiptResult` method to callback the information in `verifyReceiptResult`.
+
 
 ### register
 
-**When initialize the BNS Client, BNS Client will call `Confirm wallet address API` to check whether your wallet address has been successfully registered with in ITM BNS. Developers can implement the code in `register` method to return the `registerRequest` and `registerResult`.**
+**When initialize the BNS Client, BNS Client will send `registerRequest` to BNS Server and receive `registerResult` from BNS Server. Developers can implement the code in `register` callback method to callback the `registerRequest` and `registerResult`.**
 
 - [RegisterRequest.java](../../bns-client/src/main/java/com/itrustmachines/client/register/vo/RegisterRequest.java)
 
@@ -51,10 +50,9 @@ Before starting to go throught the documents. you can refer to [BNS API Doc](htt
 
 ### createLedgerInputByCmd
 
-**After successful initialization the BNS Client, BNS Client will build `ledgerInputRequest` with `CMD` and other information. Developers can implement the code in `createLedgerInputByCmd` method to callback the `ledgerInputRequest`.**
+**After successfully initializing the BNS Client, BNS Client will store CMD and other attestation data in `ledgerInputRequest` and do ledgerInput to send `ledgerInputRequest` to the BNS Server. Developers can implement the code in `createLedgerInputByCmd` method to callback the `ledgerInputRequest`.**
 
 - [LedgerInputRequest.java](../../bns-client/src/main/java/com/itrustmachines/client/input/vo/LedgerInputRequest.java)
-  
   ```java
   public class LedgerInputRequest implements Serializable, Cloneable {
     private String callerAddress;   // MetaMask wallet address
@@ -77,10 +75,9 @@ Before starting to go throught the documents. you can refer to [BNS API Doc](htt
 
 ### obtainLedgerInputResponse
 
-**BNS Client will receive `ledgerInputResponse` from BNS Server after sending the `ledgerInput`. Developers can implement the code in `obtainLedgerInputResponse` method to callback the `ledgerInputResponse`.**
+**BNS Client will receive `ledgerInputResponse` from BNS Server after sending `ledgerInputRequest`. Developers can implement the code in `obtainLedgerInputResponse` method to callback the `ledgerInputResponse`.**
 
 - [LedgerInputResponse.java](../../bns-client/src/main/java/com/itrustmachines/client/input/vo/LedgerInputResponse.java)
-  
   ```java
   public class LedgerInputResponse {
     private String status;                      // The status of your ledgerInputRequest
@@ -92,7 +89,6 @@ Before starting to go throught the documents. you can refer to [BNS API Doc](htt
 
 - [CallbackSample.java](../src/main/java/com/itrustmachines/sample/CallbackSample.java)
   We recommend you to store `indexValue` and `clearanceOrder` in `receiptLocator` so that you can search your records conveniently.
-  
   ```java
   public void obtainLedgerInputResponse(ReceiptLocator locator, String cmdJson,
       LedgerInputResponse ledgerInputResponse) {
@@ -104,7 +100,6 @@ Before starting to go throught the documents. you can refer to [BNS API Doc](htt
 **The `receipt` is contained in `ledgerInputResponse`. Developers can implement the code in `obtainReceiptEvent` method to callback the `receipt`.**
 
 - [Receipt.java](../../spo-common-domain-objects/src/main/java/com/itrustmachines/common/vo/Receipt.java)
-  
   ```java
   public class Receipt implements Serializable, Cloneable {
     private String callerAddress;       // MetaMask wallet address
@@ -119,11 +114,9 @@ Before starting to go throught the documents. you can refer to [BNS API Doc](htt
     private SpoSignature sigServer;     // The signature from BNS
   }
   ```
-
 - [CallbackSample.java](../src/main/java/com/itrustmachines/sample/CallbackSample.java)
   
   We recommend you to store `indexValue` and `clearanceOrder` in `receiptLocator` so that you can search your records conveniently.
-  
   ```java
   public void obtainReceiptEvent(ReceiptEvent receiptEvent) {
   }
@@ -132,6 +125,7 @@ Before starting to go throught the documents. you can refer to [BNS API Doc](htt
 ### obtainDoneClearanceOrderEvent
 
 **The `doneClearanceOrder` is contained in `ledgerInputResponse` . BNS Client will use `doneClearanceOrder` to find out which receipts need to be verified. Developers can implement the code in `obtainDoneClearanceOrderEvent` method to callback the `doneClearanceOrder`.**
+
 
 - [DoneClearanceOrderEvent.java](../../bns-client/src/main/java/com/itrustmachines/client/verify/vo/DoneClearanceOrderEvent.java)
 
@@ -148,9 +142,10 @@ Before starting to go throught the documents. you can refer to [BNS API Doc](htt
   }
   ```
 
+
 ### obtainMerkleProof
 
-**Before verifying the receipt, BNS Client will call `Get Merkle proof API` to request the `merkleProof` of those to be verified receipts from the BNS Server. The Merkle Proof is evidence of receipt verification. BNS Client will use Merkle proof to verify the receipt whether receipt is in the TP-merkle tree. Developers can implement the code in `obtainMerkleProof` method to callback the `merkleProof`**
+**Before verifying the receipt, BNS Client will request the `merkleProof` of those to be verified receipts from the Server. The Merkle Proof is evidence of receipt verification. BNS Client will use Merkle proof to verify the receipt whether receipt is in the TP-merkle tree. Developers can implement the code in `obtainMerkleProof` method to callback the `merkleProof`.**
 
 - [MerkleProof.java](../../spo-common-domain-objects/src/main/java/com/itrustmachines/common/vo/MerkleProof.java)
 

@@ -24,7 +24,7 @@
   - [Callback 串接實作教學](itm-bns-sample/doc/callback_zh.md)
   - [ReceiptDao 功能教學](itm-bns-sample/doc/receiptDao_zh.md)
   - [BNS Java Client 其他設定教學](itm-bns-sample/doc/other_setting_zh.md)
-  - [資料夾自動存證教學](bns-auto-folder-attest/doc/bns-auto-folder-attest_zh.md)
+  - [BNS 資料夾檔案自動存證](bns-auto-folder-attest/doc/bns-auto-folder-attest_zh.md)
 
 - **若您已經完成教學文件中的每個步驟，您可以參考前往主程式流程說明，了解程式詳細的運作流程。**
 

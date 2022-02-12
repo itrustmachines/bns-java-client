@@ -76,20 +76,20 @@ To change the following setting, please refer to configuration file, [sample.pro
 
 #### verifyBatchSize
 
-`verifyBatchSize` set how many receipts that BNS Client verify at a time.
+`verifyBatchSize` can set the number of receipt that BNS Client verify at a time
 
 #### verifyDelaySec
 
-`verifyDelaySec` set the delay second between each verification.
+`verifyDelaySec` can set the delay second in each verification
 
 #### RetryDelaySec
 
-`RetryDelaySec` set the time duration between each retrying.
+BNS Client will delay second when the count of resend the request meet the maximum resend count. `RetryDelaySec` can set the delay second when BNS Client meet the maximum resend count.
 
 ----
-Tutorials are now complete. Next, you can explore the Auto Folder attestation
+Tutorials are now complete. Next, you can explore the overview of BNS Client
 
 ## Next Steps
 
-Next Page : [BNS Auto folder attestation](./bns-auto-folder-attest_en.md)  
+Next Page : [BNS Auto Folder Attest](../../bns-auto-folder-attest/doc/bns-auto-folder-attest_en.md)  
 Last Page : [Build the ReceiptDao Applications](./receiptDao_en.md)

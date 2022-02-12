@@ -5,7 +5,13 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
@@ -19,7 +25,7 @@ public class BnsClientConfig {
   public static final int DEFAULT_VERIFY_BATCH_SIZE = 10;
   public static final int DEFAULT_VERIFY_DELAY_SEC = 1;
   public static final int DEFAULT_RETRY_DELAY_SEC = 5;
-
+  
   private String privateKey;
   private String bnsServerUrl;
   private String email;
@@ -38,7 +44,7 @@ public class BnsClientConfig {
   public static BnsClientConfig load(@NonNull final String configFilePath) {
     final Properties props = new Properties();
     props.load(new FileInputStream(configFilePath));
-
+    
     final String privateKey = props.getProperty("privateKey");
     final String bnsServerUrl = props.getProperty("bnsServerUrl");
     final String email = props.getProperty("email");
@@ -53,7 +59,7 @@ public class BnsClientConfig {
     }
     int verifyDelaySec = NumberUtils.toInt(props.getProperty("verifyDelaySec"), DEFAULT_VERIFY_DELAY_SEC);
     int retryDelaySec = NumberUtils.toInt(props.getProperty("retryDelaySec"), DEFAULT_RETRY_DELAY_SEC);
-
+    
     final BnsClientConfig result = BnsClientConfig.builder()
                                                   .privateKey(privateKey)
                                                   .bnsServerUrl(bnsServerUrl)

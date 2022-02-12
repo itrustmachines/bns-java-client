@@ -5,9 +5,9 @@ import com.itrustmachines.client.input.vo.LedgerInputResponse;
 import com.itrustmachines.client.register.vo.RegisterRequest;
 import com.itrustmachines.client.verify.vo.DoneClearanceOrderEvent;
 import com.itrustmachines.client.vo.ReceiptEvent;
-import com.itrustmachines.common.vo.ReceiptLocator;
 import com.itrustmachines.common.vo.MerkleProof;
 import com.itrustmachines.common.vo.Receipt;
+import com.itrustmachines.common.vo.ReceiptLocator;
 import com.itrustmachines.verification.vo.VerifyReceiptAndMerkleProofResult;
 
 public interface BnsClientCallback {
@@ -20,7 +20,6 @@ public interface BnsClientCallback {
   
   /** 3.1 */
   void obtainLedgerInputResponse(ReceiptLocator locator, String cmdJson, LedgerInputResponse ledgerInputResponse);
-
   
   /** 4. Receipt from LedgerInputResult | Obtain from SPO Server API */
   // TODO add source
