@@ -1,6 +1,6 @@
 # ITM BNS JAVA Client SDK User Guide English Version
 
-[中文版](./README_ZH.md)
+[中文版](README_ZH.md)
 
 ## Introduction
 
@@ -29,6 +29,7 @@ The tutorials are intended to guide you through following documents to build the
 - [Build the Callback Applications](itm-bns-sample/doc/callback_en.md)
 - [Build the ReceiptDao Applications](itm-bns-sample/doc/receiptDao_en.md)
 - [Configure setting of BNS Java Client](itm-bns-sample/doc/other_setting_en.md)
+- [BNS auto folder attest service](bns-auto-folder-attest/doc/bns-auto-folder-attest_en.md)
 
 Complete the tutorial for each document, then you will be ready to run the [overview of BNS Java Client](itm-bns-sample/doc/summary_en.md) to modify or learn more details about our SDK
 

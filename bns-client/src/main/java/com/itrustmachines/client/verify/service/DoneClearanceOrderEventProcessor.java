@@ -10,7 +10,10 @@ import com.itrustmachines.client.service.BnsClientReceiptService;
 import com.itrustmachines.client.todo.BnsClientCallback;
 import com.itrustmachines.client.verify.vo.DoneClearanceOrderEvent;
 import com.itrustmachines.common.ethereum.service.ClientContractService;
-import com.itrustmachines.common.vo.*;
+import com.itrustmachines.common.vo.ClearanceRecord;
+import com.itrustmachines.common.vo.MerkleProof;
+import com.itrustmachines.common.vo.Receipt;
+import com.itrustmachines.common.vo.ReceiptLocator;
 import com.itrustmachines.verification.service.VerifyReceiptAndMerkleProofService;
 import com.itrustmachines.verification.vo.VerifyReceiptAndMerkleProofResult;
 
@@ -32,7 +35,6 @@ public class DoneClearanceOrderEventProcessor {
   private final int verifyDelaySec;
   
   private final String serverWalletAddress;
-  private KeyInfo keyInfo;
   private long doneClearanceOrder;
   private boolean isCloseCalled;
   private final ExecutorService executorService;
@@ -41,7 +43,7 @@ public class DoneClearanceOrderEventProcessor {
       @NonNull final BnsClientReceiptService receiptService, @NonNull final MerkleProofService merkleProofService,
       @NonNull final VerifyReceiptAndMerkleProofService verifyService,
       @NonNull final ClientContractService contractService, @NonNull final String serverWalletAddress,
-      final int verifyBatchSize, final int verifyDelaySec, @NonNull final KeyInfo keyInfo ) {
+      final int verifyBatchSize, final int verifyDelaySec) {
     this.callback = callback;
     this.receiptService = receiptService;
     this.merkleProofService = merkleProofService;
@@ -50,7 +52,6 @@ public class DoneClearanceOrderEventProcessor {
     this.verifyBatchSize = verifyBatchSize;
     this.verifyDelaySec = verifyDelaySec;
     this.serverWalletAddress = serverWalletAddress;
-    this.keyInfo = keyInfo;
     this.isCloseCalled = false;
     this.executorService = Executors.newSingleThreadExecutor();
     executorService.submit(this::verifyReceipts);
@@ -97,7 +98,7 @@ public class DoneClearanceOrderEventProcessor {
             MerkleProof merkleProof = null;
             VerifyReceiptAndMerkleProofResult verifyResult;
             try {
-              merkleProof = merkleProofService.postMerkleProof(locator, keyInfo);
+              merkleProof = merkleProofService.postMerkleProof(locator);
               final ClearanceRecord clearanceRecord = contractService.obtainClearanceRecord(
                   merkleProof.getClearanceOrder());
               verifyResult = verifyService.verify(receipt, merkleProof, serverWalletAddress, clearanceRecord);

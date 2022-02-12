@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @Slf4j
 public class RegisterRequest implements Serializable, Cloneable {
-
+  
   private String address;
   private String email;
   private String toSignMessage;
@@ -29,7 +29,6 @@ public class RegisterRequest implements Serializable, Cloneable {
   public RegisterRequest clone() {
     return SerializationUtils.clone(this);
   }
-
   
   public RegisterRequest sign(final @NonNull String privateKey) {
     RegisterRequest result;

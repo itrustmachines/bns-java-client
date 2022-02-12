@@ -1,6 +1,5 @@
 package com.itrustmachines.client.input.vo;
 
-
 import java.util.List;
 
 import com.itrustmachines.common.vo.Receipt;

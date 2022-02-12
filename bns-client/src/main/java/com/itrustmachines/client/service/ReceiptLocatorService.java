@@ -4,30 +4,37 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
-import com.itrustmachines.client.vo.ReceiptLocatorRequest;
+import com.itrustmachines.client.util.OkHttpClientUtil;
 import com.itrustmachines.common.constants.StatusConstants;
-import com.itrustmachines.common.util.OkHttpClientUtil;
 import com.itrustmachines.common.util.UrlUtil;
 import com.itrustmachines.common.vo.KeyInfo;
 import com.itrustmachines.common.vo.ReceiptLocator;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 @ToString
 @Slf4j
 public class ReceiptLocatorService {
   
-  /** API: /ledger/clearanceOrderAndSn/{indexValueKey} */
-  private static final String API_PATH = "/ledger/clearanceOrderAndSn";
+  private static final String API_PATH = "/clearanceOrderAndSn/{indexValueKey}";
   private static final int MAX_RETRY_TIMES = 5;
   
   private final String apiUrl;
   private final OkHttpClient okHttpClient;
   private final Gson gson;
   private final int retryDelaySec;
-
+  
   private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
   
   public ReceiptLocatorService(String bnsServerUrl, int retryDelaySec) {
@@ -52,16 +59,14 @@ public class ReceiptLocatorService {
   }
   
   @SneakyThrows
-  public ReceiptLocator postReceiptLocator( final @NonNull KeyInfo keyInfo ) {
+  public ReceiptLocator postReceiptLocator(final @NonNull KeyInfo keyInfo) {
     log.debug("obtainReceiptLocator() start");
-
-    ReceiptLocatorRequest receiptLocatorRequest = buildReceiptLocatorRequest( keyInfo );
     ReceiptLocatorResponse res = null;
     for (int retryCount = 0; retryCount <= MAX_RETRY_TIMES; retryCount++) {
       log.debug("obtainReceiptLocator() retryCount={}", retryCount);
       try {
-
-        res = getReceiptLocatorResponse( receiptLocatorRequest );
+        
+        res = getReceiptLocatorResponse(keyInfo.getAddress());
         if (checkResponse(res)) {
           break;
         }
@@ -108,14 +113,14 @@ public class ReceiptLocatorService {
   }
   
   @SneakyThrows
-  private ReceiptLocatorResponse getReceiptLocatorResponse(@NonNull ReceiptLocatorRequest receiptLocatorRequest) {
-
+  private ReceiptLocatorResponse getReceiptLocatorResponse(@NonNull String indexValueKey) {
+    
     log.debug("getReceiptLocatorResponse() requestUrl={}", apiUrl);
-
-    final Request request = new Request.Builder().url(apiUrl)
-            .post(RequestBody.create(gson.toJson(receiptLocatorRequest), JSON))
-            .build();
-
+    
+    final Request request = new Request.Builder().url(apiUrl.replace("{indexValueKey}", indexValueKey))
+                                                 .get()
+                                                 .build();
+    
     try (final Response response = okHttpClient.newCall(request)
                                                .execute()) {
       final String resString = Objects.requireNonNull(response.body())
@@ -124,21 +129,6 @@ public class ReceiptLocatorService {
       log.debug("getReceiptLocatorResponse() res={}", res);
       return res;
     }
-  }
-
-  public ReceiptLocatorRequest buildReceiptLocatorRequest(final @NonNull KeyInfo keyInfo ) {
-    log.debug("buildReceiptLocatorRequest() begin, keyInfo={}", keyInfo);
-
-    final String toSignMessage = "clearanceOrderAndSn";
-    final ReceiptLocatorRequest receiptLocatorRequest = ReceiptLocatorRequest.builder()
-            .address(keyInfo.getAddress())
-            .indexValueKey(keyInfo.getAddress())
-            .toSignMessage(toSignMessage)
-            .build()
-            .sign(keyInfo.getPrivateKey());
-
-    log.debug("buildReceiptLocatorRequest() end, receiptLocatorRequest={}", receiptLocatorRequest);
-    return receiptLocatorRequest;
   }
   
 }

@@ -1,6 +1,7 @@
 package com.itrustmachines.client.vo;
 
 import com.itrustmachines.common.vo.Receipt;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

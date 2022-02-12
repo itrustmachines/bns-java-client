@@ -28,6 +28,7 @@
     <modules>
         <module>bns-client</module>
         <module>itm-bns-sample</module>
+        <module>bns-auto-folder-attest</module>
 
     </modules>
 

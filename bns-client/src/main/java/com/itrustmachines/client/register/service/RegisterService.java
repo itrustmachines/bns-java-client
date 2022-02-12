@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.Gson;
 import com.itrustmachines.client.register.vo.RegisterRequest;
 import com.itrustmachines.client.todo.BnsClientCallback;
-import com.itrustmachines.common.util.OkHttpClientUtil;
+import com.itrustmachines.client.util.OkHttpClientUtil;
 import com.itrustmachines.common.util.UrlUtil;
 import com.itrustmachines.common.vo.KeyInfo;
 
@@ -37,7 +37,8 @@ public class RegisterService {
   private final OkHttpClient okHttpClient;
   private final int retryDelaySec;
   
-  public RegisterService(String bnsServerUrl, BnsClientCallback bnsClientCallback, KeyInfo keyInfo, int retryDelaySec, String email) {
+  public RegisterService(String bnsServerUrl, BnsClientCallback bnsClientCallback, KeyInfo keyInfo, int retryDelaySec,
+      String email) {
     this.bnsClientCallback = bnsClientCallback;
     this.keyInfo = keyInfo;
     this.bnsServerUrl = bnsServerUrl;
@@ -95,7 +96,7 @@ public class RegisterService {
     log.debug("register() result={}", result);
     return result;
   }
-
+  
   @SneakyThrows
   public String postRegister(RegisterRequest registerReq) {
     log.debug("postRegister() begin, registerReq={}, apiUrl={}", registerReq, apiUrl);
@@ -121,7 +122,7 @@ public class RegisterService {
       log.warn("checkResponse() result= false, registerRes is null");
       return false;
     }
-
+    
     log.debug("checkResponse() result=true, response ok");
     return true;
   }
@@ -129,18 +130,18 @@ public class RegisterService {
   boolean checkRegisterResult(String res) {
     log.debug("checkRegisterResult() begin, res={}", res);
     boolean result = false;
-
-    if ( res.compareToIgnoreCase("true") == 0 ) {
+    
+    if (res.compareToIgnoreCase("true") == 0) {
       result = true;
     }
-
+    
     log.debug("checkRegisterResult() end, result={}", result);
     return result;
   }
   
   private RegisterRequest buildRegisterRequest(final @NonNull KeyInfo keyInfo, final @NonNull String email) {
     log.debug("buildRegisterRequest() begin, keyInfo={}", keyInfo);
-
+    
     final String toSignMessage = keyInfo.getAddress();
     final RegisterRequest registerReq = RegisterRequest.builder()
                                                        .address(keyInfo.getAddress())
@@ -152,46 +153,43 @@ public class RegisterService {
     log.debug("buildRegisterRequest() end, registerRequest={}", registerReq);
     return registerReq;
   }
-
-
+  
   @SneakyThrows
   private Boolean getRegister(@NonNull final String callerAddress) {
     log.debug("getRegister() begin, callerAddress={}", callerAddress);
-    final String url = UrlUtil.urlWithoutSlash(bnsServerUrl)
-            + CHECK_REGISTER_PATH + callerAddress;
-
+    final String url = UrlUtil.urlWithoutSlash(bnsServerUrl) + CHECK_REGISTER_PATH + callerAddress;
+    
     Request request = new Request.Builder().url(url)
-            .get()
-            .build();
+                                           .get()
+                                           .build();
     Boolean res;
     try (final Response response = okHttpClient.newCall(request)
-            .execute()) {
+                                               .execute()) {
       log.debug("getRegister() response={}", response);
       final String resString = Objects.requireNonNull(response.body())
-              .string();
+                                      .string();
       res = gson.fromJson(resString, Boolean.class);
       log.debug("getRegister() res={}", res);
       return res;
     }
   }
-
+  
   @SneakyThrows
   public boolean checkRegister() {
-
-    boolean result = false;
-    Boolean res = false;
-
+    
+    Boolean result = null;
+    
     for (int retryCount = 0; retryCount <= MAX_RETRY_TIMES; retryCount++) {
       log.debug("checkRegister() retryCount={}", retryCount);
       try {
-        res = getRegister(keyInfo.getAddress());
-        log.debug("checkRegister() res={}", res);
-        if (res != true) {
+        result = getRegister(keyInfo.getAddress());
+        log.debug("checkRegister() result={}", result);
+        if (result != null) {
           break;
         }
       } catch (Exception e) {
         if (Thread.currentThread()
-                .isInterrupted()) {
+                  .isInterrupted()) {
           throw e;
         }
         if (retryCount == MAX_RETRY_TIMES) {
@@ -201,13 +199,7 @@ public class RegisterService {
         TimeUnit.SECONDS.sleep(retryDelaySec);
       }
     }
-
-    if (res == false) {
-      return result;
-    }
-
-    result = true;
-
+    
     log.debug("checkRegister() result={}", result);
     return result;
   }

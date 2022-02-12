@@ -5,23 +5,29 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.itrustmachines.client.todo.BnsClientCallback;
-import com.itrustmachines.client.vo.DoneClearanceOrderRequest;
-import com.itrustmachines.client.vo.MerkleProofRequest;
-import com.itrustmachines.common.util.OkHttpClientUtil;
+import com.itrustmachines.client.util.OkHttpClientUtil;
 import com.itrustmachines.common.util.UrlUtil;
-import com.itrustmachines.common.vo.KeyInfo;
 import com.itrustmachines.common.vo.MerkleProof;
 import com.itrustmachines.common.vo.ReceiptLocator;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 @ToString
 @Slf4j
 public class MerkleProofService {
   
-  private static final String API_PATH = "/ledger/verify/merkleProof";
+  private static final String API_PATH = "/verify/merkleProof/{clearanceOrder}/{indexValueReq}";
   private static final int MAX_RETRY_TIMES = 5;
   
   private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -34,7 +40,7 @@ public class MerkleProofService {
   private final OkHttpClient okHttpClient;
   
   public MerkleProofService(@NonNull final String bnsServerUrl, @NonNull final BnsClientCallback callback,
-      @NonNull final int retryDelaySec) {
+      final int retryDelaySec) {
     this.apiUrl = UrlUtil.urlWithoutSlash(bnsServerUrl) + API_PATH;
     this.callback = callback;
     this.retryDelaySec = retryDelaySec;
@@ -57,17 +63,16 @@ public class MerkleProofService {
   }
   
   @SneakyThrows
-  public MerkleProof postMerkleProof(@NonNull final ReceiptLocator receiptLocator, @NonNull final KeyInfo keyInfo ) {
-
+  public MerkleProof postMerkleProof(@NonNull final ReceiptLocator receiptLocator) {
+    
     log.debug("obtainMerkleProof() begin, receiptLocator={}", receiptLocator);
-    MerkleProofRequest merkleProofRequest = buildMerkleProofRequest( receiptLocator, keyInfo );
-
+    
     MerkleProofResponse res = null;
     for (int retryCount = 0; retryCount <= MAX_RETRY_TIMES; retryCount++) {
       log.debug("obtainMerkleProof() retryCount={}", retryCount);
       
       try {
-        res = getMerkleProofResponse( merkleProofRequest );
+        res = getMerkleProofResponse(receiptLocator);
         log.debug("obtainMerkleProof() res={}", res);
         if (checkResponse(res)) {
           break;
@@ -116,14 +121,16 @@ public class MerkleProofService {
   }
   
   @SneakyThrows
-  MerkleProofResponse getMerkleProofResponse(@NonNull final MerkleProofRequest merkleProofRequest) {
-
+  MerkleProofResponse getMerkleProofResponse(@NonNull final ReceiptLocator receiptLocator) {
+    
     log.debug("getMerkleProofResponse() requestUrl={}", apiUrl);
-
-    final Request request = new Request.Builder().url(apiUrl)
-            .post(RequestBody.create(gson.toJson(merkleProofRequest), JSON))
-            .build();
-
+    
+    final Request request = new Request.Builder().url(
+        apiUrl.replace("{clearanceOrder}", "" + receiptLocator.getClearanceOrder())
+              .replace("{indexValueReq}", receiptLocator.getIndexValue()))
+                                                 .get()
+                                                 .build();
+    
     try (final Response res = okHttpClient.newCall(request)
                                           .execute()) {
       log.debug("getMerkleProofResponse() res={}", res);
@@ -144,20 +151,5 @@ public class MerkleProofService {
     log.debug("checkResponse() result=true, merkleProofRes is not null");
     return true;
   }
-
-  public MerkleProofRequest buildMerkleProofRequest( ReceiptLocator receiptLocator, KeyInfo keyInfo ){
-    log.debug("buildMerkleProofRequest() begin, keyInfo={}, receiptLocator", keyInfo, receiptLocator);
-
-    final String toSignMessage = "merkleProof";
-    final MerkleProofRequest merkleProofRequest = MerkleProofRequest.builder()
-            .address(keyInfo.getAddress())
-            .clearanceOrder(receiptLocator.getClearanceOrder())
-            .indexValue(receiptLocator.getIndexValue())
-            .toSignMessage(toSignMessage)
-            .build()
-            .sign(keyInfo.getPrivateKey());
-
-    log.debug("buildMerkleProofRequest() end, merkleProofRequest={}", merkleProofRequest);
-    return merkleProofRequest;
-  }
+  
 }

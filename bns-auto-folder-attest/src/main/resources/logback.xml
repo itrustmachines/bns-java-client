@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>[%date{ISO8601}][%level][%thread][%logger{0}] %msg%n</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>./logs/BnsAutoFolderAttest-%d{yyyy-MM-dd}_%i.log.zip</fileNamePattern>
+      <maxHistory>10</maxHistory>
+      <maxFileSize>25MB</maxFileSize>
+      <totalSizeCap>250MB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+      <pattern>[%date{ISO8601}][%level][%thread][%logger{0}] %msg%n</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <logger name="com.itrustmachines" level="INFO"/>
+  <logger name="com.j256.ormlite" level="WARN"/>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+</configuration>

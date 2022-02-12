@@ -44,24 +44,11 @@
 
 - 範例主程式 [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java) 中會使用此設定檔進行私鑰、區塊鏈位址、電子郵件 ... 等設定，**本設定檔內容十分重要，請依照下方說明實作，再執行範例程式**
 
-- **在修改設定檔前，請先依照下方三點說明建立執行環境並取得私鑰以及區塊鏈位址**
-
-  1. 在您的 .m2 資料夾中建立 `settings.xml` 檔，並將下列內容複製貼上。
-    ```xml
-    <settings>
-      <servers>
-        <server>
-          <id>kuro-nexus-releases</id>
-          <username>guest</username>
-          <password>guest</password>
-        </server>
-      </servers>
-    </settings>
-    ```
+- 在修改設定檔前，請先依照下方兩點說明先取得私鑰以及區塊鏈位址
   
-3. 為了確保每個資料來源的可信度，所以需要一組專屬私鑰進行數位簽章，避免他人冒用，**每個資料來源的私鑰必須唯一**。私鑰請至 MetaMask 帳戶中輸出
+1. 為了確保每個資料來源的可信度，所以需要一組專屬私鑰進行數位簽章，避免他人冒用，**每個資料來源的私鑰必須唯一**。私鑰請至 MetaMask 帳戶中輸出
 
-4. 我們使用以太坊 Rinkeby 測試鏈作為測試環境。為了向 Rinkeby 測試鏈取得鏈上證據，所以需要 Rinkeby 測試鏈節點位址。Rinkeby 測試鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
+2. 我們使用以太坊 Rinkeby 測試鏈作為測試環境。為了向 Rinkeby 測試鏈取得鏈上證據，所以需要 Rinkeby 測試鏈節點位址。Rinkeby 測試鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
    
      - [Infura 教學](./infura_zh.md)
 
@@ -110,7 +97,7 @@
   $ mvn clean package
   $ java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```
-**如果您的 Maven 版本高於 3.8.1 版，maven 預設會阻擋 HTTP repo，請參考 [此連結](https://stackoverflow.com/questions/67001968/how-to-disable-maven-blocking-external-http-repositores) 解決方式**
+
 #### Visual Studio Code
 
 1. 開啟命令例
