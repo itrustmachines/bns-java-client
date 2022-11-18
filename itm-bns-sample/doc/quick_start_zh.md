@@ -48,7 +48,7 @@
   
 1. 為了確保每個資料來源的可信度，所以需要一組專屬私鑰進行數位簽章，避免他人冒用，**每個資料來源的私鑰必須唯一**。私鑰請至 MetaMask 帳戶中輸出
 
-2. 我們使用以太坊 Rinkeby 測試鏈作為測試環境。為了向 Rinkeby 測試鏈取得鏈上證據，所以需要 Rinkeby 測試鏈節點位址。Rinkeby 測試鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
+2. 我們使用以太坊 Goerli 測試鏈作為測試環境。為了向 Goerli 測試鏈取得鏈上證據，所以需要 Goerli 測試鏈節點位址。Goerli 測試鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
    
      - [Infura 教學](./infura_zh.md)
 
@@ -65,11 +65,11 @@
     bnsServerUrl=https://azure-dev-membership.itm.monster:8088/
     
     /** 
-     * 我們提供的測試環境使用以太坊 Rinkeby 測試鏈
-     * 請確認此節點位址屬於 Rinkeby 測試鏈的節點位址，再填入 
+     * 我們提供的測試環境使用以太坊 Goerli 測試鏈
+     * 請確認此節點位址屬於 Goerli 測試鏈的節點位址，再填入 
      * 節點位址取得方式，請見上方說明
      */
-    nodeUrl=https://rinkeby.infura.io/v3/{InfuraProjectId}
+    nodeUrl=https://goerli.infura.io/v3/{InfuraProjectId}
   
     /**
      * 請填入您的電子郵件信箱
@@ -94,7 +94,7 @@
   $ cd bns-java-client/itm-bns-sample
 
   # 執行主程式，將存證內容 LedgerInput 傳送至 SPO Server
-  $ mvn clean package
+  $ mvn clean package -s settings.xml
   $ java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```
 
@@ -103,14 +103,14 @@
 1. 開啟命令例
 2. 輸入 Maven 並選擇 `Maven : Execute Commands`
 3. 選擇 itm-spo-sdk-sample 專案
-4. 選擇 Custom 並輸入 `mvn clean package` 編譯程式
+4. 選擇 Custom 並輸入 `mvn clean package -s settings.xml` 編譯程式
 5. 執行 `./target/itm-bns-sample-1.1.1-SNAPSHOT.jar`
 
 #### Intellij IDEA
 
 1. 開啟 itm-spo-sdk-java with Maven Project
 2. 點選右邊側欄的 Maven Tools 選擇 execute maven goal
-3. 輸入 `mvn clean package` 並執行
+3. 輸入 `mvn clean package -s settings.xml` 並執行
 4. 左邊側欄檔案系統中，右鍵點選的位在 `target` 資料夾中的 `itm-bns-sample-1.1.1-SNAPSHOT.jar` 執行程式
 
 ### 5. 確認執行結果
