@@ -189,12 +189,12 @@
 
         <repository>
             <id>kuro-nexus-releases</id>
-            <url>http://itm-kuro.itm.monster:8081/repository/maven-releases</url>
+            <url>https://itm-registry.itm.monster:8281/repository/maven-releases</url>
         </repository>
 
         <repository>
             <id>kuro-nexus-snapshots</id>
-            <url>http://itm-kuro.itm.monster:8081/repository/maven-snapshots</url>
+            <url>https://itm-registry.itm.monster:8281/repository/maven-snapshots</url>
         </repository>
     </repositories>
 

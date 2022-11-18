@@ -1,0 +1,14 @@
+<settings>
+    <servers>
+        <server>
+            <id>kuro-nexus-releases</id>
+            <username>guest</username>
+            <password>guest</password>
+        </server>
+        <server>
+            <id>kuro-nexus-snapshots</id>
+            <username>guest</username>
+            <password>guest</password>
+        </server>
+    </servers>
+</settings>
