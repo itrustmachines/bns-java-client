@@ -79,7 +79,7 @@ Private Key : Export from you MetaMask Account
 PIN code : At least 8 character or number
 
 ```shell
-> ./mvnw.cmd clean package -DskipTests
+> ./mvnw.cmd clean package -DskipTests -s settings.xml
 > cd bns-auto-folder-attest
 > java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```

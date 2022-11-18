@@ -1,1 +1,1 @@
-mvn clean package exec:java -Dexec.classpathScope=compile
+mvn clean package exec:java -Dexec.classpathScope=compile -s settings.xml
