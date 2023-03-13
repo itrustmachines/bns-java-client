@@ -3,7 +3,7 @@
 ### 關於 Callback 實作說明文件
 
 - Callback 的功能為將 BNS Client 與 BNS Server API 的 Request Body 和 Response 傳送至自己的系統中。在上一份文件中，你已經了解如何設計 CMD。在這份文件中，我們將引導您實作 Callback 將事件傳送至自己的系統。
-- API 文件可至 [BNS API DOC website](https://azure-dev-membership.itm.monster/api) 查看
+- API 文件可至 [BNS API DOC website](https://bns.itrustmachines.com/api) 查看
 
 - 我們總共定義 7 個事件可以 Callback，分別為 :
 
