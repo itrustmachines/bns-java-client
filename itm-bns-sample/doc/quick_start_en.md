@@ -87,6 +87,18 @@ retryDelaySec=5
 ### 4. Run the Sample Code
 
 #### Command Line Interface
+Move to bns-java-client folder
+
+```shell
+> cd bns-java-client
+```
+
+Build all bns-java-client package
+
+```shell
+> mvn clean install -s settings.xml
+```
+
 Move to itm-bns-sample folder
 
 ```shell
@@ -105,7 +117,7 @@ Execute the program to start doing ledgerInput
 1. Open Command Palette
 2. Type Maven and choose `Maven : Execute Commands`
 3. Choose itm-bns-sample project
-4. Choose Custom and type `mvn clean package -s settings.xml` to compile the code
+4. Choose Custom and type `mvn clean package` to compile the code
 5. Execute the `./target/itm-bns-sample-1.1.1-SNAPSHOT.jar`
 
 #### Intellij IDEA
@@ -113,14 +125,14 @@ Execute the program to start doing ledgerInput
 1. Open itm-spo-sdk-java with Maven Project
 2. Click Maven Tool at right panel
 3. Click execute maven goal
-4. Type `mvn clean package -s settings.xml` and press Enter to compile the code
+4. Type `mvn clean package` and press Enter to compile the code
 5. right click `itm-bns-sample-1.1.1-SNAPSHOT.jar` and click run `itm-bns-sample-1.1.1-SNAPSHOT.jar`
 
 ### 5. Check the result
 
 After executing the sample code. The BNS Java Client will start ledgerinput. You can check the result of ledgerinput on BNS Website.
 
-1. Use your Web Browser to open [BNS Website](https://azure-dev-membership.itm.monster:8088/)
+1. Use your Web Browser to open [BNS Website](https://bns.itrustmachines.com/)
 
 2. Click the Check Records then you can check all of your ledgerinput records
 

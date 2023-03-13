@@ -90,11 +90,15 @@
 
 #### Command Line Interface
 ```shell
-  # 切換至 itm-spo-sdk-sample 資料夾
+  # 切換至 bns-java-client 資料夾
+  $ cd bns-java-client
+  $ mvn clean install
+  
+  # 切換至 itm-bns-sample 資料夾
   $ cd bns-java-client/itm-bns-sample
 
   # 執行主程式，將存證內容 LedgerInput 傳送至 SPO Server
-  $ mvn clean package -s settings.xml
+  $ mvn clean package
   $ java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```
 
@@ -103,21 +107,21 @@
 1. 開啟命令例
 2. 輸入 Maven 並選擇 `Maven : Execute Commands`
 3. 選擇 itm-spo-sdk-sample 專案
-4. 選擇 Custom 並輸入 `mvn clean package -s settings.xml` 編譯程式
+4. 選擇 Custom 並輸入 `mvn clean package` 編譯程式
 5. 執行 `./target/itm-bns-sample-1.1.1-SNAPSHOT.jar`
 
 #### Intellij IDEA
 
-1. 開啟 itm-spo-sdk-java with Maven Project
+1. 開啟 bns-java-client with Maven Project
 2. 點選右邊側欄的 Maven Tools 選擇 execute maven goal
-3. 輸入 `mvn clean package -s settings.xml` 並執行
+3. 輸入 `mvn clean package` 並執行
 4. 左邊側欄檔案系統中，右鍵點選的位在 `target` 資料夾中的 `itm-bns-sample-1.1.1-SNAPSHOT.jar` 執行程式
 
 ### 5. 確認執行結果
 
-執行範例程式後，可透過 [BNS Website](https://azure-dev-membership.itm.monster:8088/) 確認範例程式能否將資料傳送至 BNS Server 進行存證上鏈。確認步驟如下 :
+執行範例程式後，可透過 [BNS Website](https://bns.itrustmachines.com/) 確認範例程式能否將資料傳送至 BNS Server 進行存證上鏈。確認步驟如下 :
 
-  1. 用瀏覽器開啟 [BNS Website](https://azure-dev-membership.itm.monster:8088/)
+  1. 用瀏覽器開啟 [BNS Website](https://bns.itrustmachines.com/)
   2. 點擊 Check Records，您便可以查看所有的 ledgerinputs
   3. 選擇其中一個 ledgerinput 的 '+' 圖示，您可以查看該次 legerinput 的所有資訊
   5. 若該筆資料的 Status 顯示綠色 Success 則表示資料已上鏈，反之為灰色 Waiting 等待上鏈中
