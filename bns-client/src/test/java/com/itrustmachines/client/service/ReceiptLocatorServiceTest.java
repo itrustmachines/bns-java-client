@@ -1,17 +1,16 @@
 package com.itrustmachines.client.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import com.itrustmachines.client.config.BnsClientConfig;
+import com.itrustmachines.client.login.service.LoginService;
 import com.itrustmachines.common.constants.StatusConstants;
 import com.itrustmachines.common.util.KeyInfoUtil;
 import com.itrustmachines.common.vo.KeyInfo;
 import com.itrustmachines.common.vo.ReceiptLocator;
-
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 public class ReceiptLocatorServiceTest {
@@ -19,9 +18,10 @@ public class ReceiptLocatorServiceTest {
   @Test
   public void test_obtainReceiptLocator() {
     final String privateKey = "e0c07f854d30679c32a52af9d3cc72ac13923a4e77ba97337fb2e0cc295ddfde";
-    final String bnsServerUrl = "https://azure-dev-membership.itm.monster:8088/";
+    final String bnsServerUrl = "https://bns.itrustmachines.com/";
     
     final KeyInfo keyInfo = KeyInfoUtil.buildKeyInfo(privateKey);
+    new LoginService(bnsServerUrl, keyInfo, BnsClientConfig.DEFAULT_RETRY_DELAY_SEC).login();
     final ReceiptLocatorService service = new ReceiptLocatorService(bnsServerUrl,
         BnsClientConfig.DEFAULT_RETRY_DELAY_SEC);
     
