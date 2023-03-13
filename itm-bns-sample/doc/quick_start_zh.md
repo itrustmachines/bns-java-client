@@ -48,11 +48,11 @@
   
 1. 為了確保每個資料來源的可信度，所以需要一組專屬私鑰進行數位簽章，避免他人冒用，**每個資料來源的私鑰必須唯一**。私鑰請至 MetaMask 帳戶中輸出
 
-2. 我們使用以太坊 Goerli 測試鏈作為測試環境。為了向 Goerli 測試鏈取得鏈上證據，所以需要 Goerli 測試鏈節點位址。Goerli 測試鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
+2. 我們使用以太坊主鏈作為上鏈環境。為了向 主鏈 取得鏈上證據，需要 主鏈 節點位址。主鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
    
      - [Infura 教學](./infura_zh.md)
 
-- 取得私鑰及 Rinkey 測試鏈位址後，我們可以開始修改設定檔 [sample.properties](../src/main/resources/sample.properties) ，修改方式請參考下方說明 :
+- 取得私鑰及 主鏈 位址後，我們可以開始修改設定檔 [sample.properties](../src/main/resources/sample.properties) ，修改方式請參考下方說明 :
 
     ```Java
     /**
@@ -65,11 +65,11 @@
     bnsServerUrl=https://azure-dev-membership.itm.monster:8088/
     
     /** 
-     * 我們提供的測試環境使用以太坊 Goerli 測試鏈
-     * 請確認此節點位址屬於 Goerli 測試鏈的節點位址，再填入 
+     * 我們提供的環境使用以太坊主鏈 
+     * 請確認此節點位址屬於主鏈的節點位址，再填入 
      * 節點位址取得方式，請見上方說明
      */
-    nodeUrl=https://goerli.infura.io/v3/{InfuraProjectId}
+    nodeUrl=https://mainnet.infura.io/v3/{InfuraProjectId}
   
     /**
      * 請填入您的電子郵件信箱

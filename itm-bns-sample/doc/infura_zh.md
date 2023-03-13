@@ -13,6 +13,6 @@
 5. 輸入專案名稱，點選 CREATE
    ![](https://i.imgur.com/26dhmMa.png)
 
-6. 請在 ENDPOINTS 選單中選擇 Goerli 測試鏈，並且將 URL 複製貼上到設定檔 [sample.properties](../src/main/resources/sample.properties) 中的 `nodeURL` 欄位
+6. 請在 ENDPOINTS 選單中選擇 Mainnet 主鏈，並且將 URL 複製貼上到設定檔 [sample.properties](../src/main/resources/sample.properties) 中的 `nodeURL` 欄位
    ![](../image/copy_url.png)
 
