@@ -52,7 +52,7 @@ CMD is a data you want to attest to blockchain by BNS Server. CMD is also part o
   cmdJson = new Gson().toJson(cmd);
   ```
 
-- Now, you can implement your own CMD in [Cmd.java](../src/main/java/com/itrustmachines/sample/Cmd.java) and [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java). Then, follow the instructions in quickstarts document to execute the program. We highly recommend that you keep checking the ledgerinput result on [BNS Website](https://azure-dev-membership.itm.monster/).
+- Now, you can implement your own CMD in [Cmd.java](../src/main/java/com/itrustmachines/sample/Cmd.java) and [BnsClientSample.java](../src/main/java/com/itrustmachines/sample/BnsClientSample.java). Then, follow the instructions in quickstarts document to execute the program. We highly recommend that you keep checking the ledgerinput result on [BNS Website](https://bns.itrustmachines.com/).
 
 ### File Attestation
 #### Example
@@ -92,7 +92,7 @@ If we want to attest the file, we need to convert the file contents into CMD and
   ```
 
 1. Follow the instructions in quickstart document and execute the code with `java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar --file {filepath}`
-2. Go to [BNS Website](https://azure-dev-membership.itm.monster/) to check the ledgerinput result
+2. Go to [BNS Website](https://bns.itrustmachines.com/) to check the ledgerinput result
 
 ----
 Build the CMD document is now complete. Next, learn how to build the Callback Applications

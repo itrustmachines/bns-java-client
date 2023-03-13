@@ -3,7 +3,7 @@
 ### About the Callback
 
 The Callbacks send the API events which occurs between BNS Client and BNS Server to your system. We define 7 events that you can callback. We will introduce these Callbacks in the following document.
-You can go through BNS API Doc [here](https://azure-dev-membership.itm.monster/api)
+You can go through BNS API Doc [here](https://bns.itrustmachines.com/api)
 
 ### Prerequisites
 - Complete quickstarts document

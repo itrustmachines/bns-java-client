@@ -62,7 +62,7 @@
     privateKey=
 
     /** 填入 BNS Server 的 URL */
-    bnsServerUrl=https://azure-dev-membership.itm.monster:8088/
+    bnsServerUrl=https://bns.itrustmachines.com/
     
     /** 
      * 我們提供的環境使用以太坊主鏈 
