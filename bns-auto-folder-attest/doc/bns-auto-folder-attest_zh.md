@@ -68,7 +68,7 @@ retryDelaySec=5
 私鑰 : 從您的 MetaMask 帳戶中輸出
 PIN : 任意 8 個以上的數字或英文字母
 ```shell
-> ./mvnw.cmd clean package -DskipTests
+> ./mvnw.cmd clean package -DskipTests -s settings.xml
 > cd bns-auto-folder-attest
 > java -jar ./target/itm-bns-sample-1.1.1-SNAPSHOT.jar
 ```

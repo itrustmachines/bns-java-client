@@ -17,7 +17,7 @@ import com.itrustmachines.common.vo.ReceiptLocator;
 
 public class MerkleProofServiceTest {
   
-  final String bnsServerUrl = "https://azure-dev-membership.itm.monster/";
+  final String bnsServerUrl = "https://bns.itrustmachines.com/";
   
   @Test
   public void test_obtainMerkleProof_error() {

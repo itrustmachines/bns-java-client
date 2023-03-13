@@ -48,11 +48,11 @@
   
 1. 為了確保每個資料來源的可信度，所以需要一組專屬私鑰進行數位簽章，避免他人冒用，**每個資料來源的私鑰必須唯一**。私鑰請至 MetaMask 帳戶中輸出
 
-2. 我們使用以太坊 Rinkeby 測試鏈作為測試環境。為了向 Rinkeby 測試鏈取得鏈上證據，所以需要 Rinkeby 測試鏈節點位址。Rinkeby 測試鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
+2. 我們使用以太坊主鏈作為上鏈環境。為了向 主鏈 取得鏈上證據，需要 主鏈 節點位址。主鏈位址可透過 Infura 取得，請參考下方 Infura 教學連結
    
      - [Infura 教學](./infura_zh.md)
 
-- 取得私鑰及 Rinkey 測試鏈位址後，我們可以開始修改設定檔 [sample.properties](../src/main/resources/sample.properties) ，修改方式請參考下方說明 :
+- 取得私鑰及 主鏈 位址後，我們可以開始修改設定檔 [sample.properties](../src/main/resources/sample.properties) ，修改方式請參考下方說明 :
 
     ```Java
     /**
@@ -65,11 +65,11 @@
     bnsServerUrl=https://azure-dev-membership.itm.monster:8088/
     
     /** 
-     * 我們提供的測試環境使用以太坊 Rinkeby 測試鏈
-     * 請確認此節點位址屬於 Rinkeby 測試鏈的節點位址，再填入 
+     * 我們提供的環境使用以太坊主鏈 
+     * 請確認此節點位址屬於主鏈的節點位址，再填入 
      * 節點位址取得方式，請見上方說明
      */
-    nodeUrl=https://rinkeby.infura.io/v3/{InfuraProjectId}
+    nodeUrl=https://mainnet.infura.io/v3/{InfuraProjectId}
   
     /**
      * 請填入您的電子郵件信箱
@@ -90,7 +90,11 @@
 
 #### Command Line Interface
 ```shell
-  # 切換至 itm-spo-sdk-sample 資料夾
+  # 切換至 bns-java-client 資料夾
+  $ cd bns-java-client
+  $ mvn clean install
+  
+  # 切換至 itm-bns-sample 資料夾
   $ cd bns-java-client/itm-bns-sample
 
   # 執行主程式，將存證內容 LedgerInput 傳送至 SPO Server
@@ -108,16 +112,16 @@
 
 #### Intellij IDEA
 
-1. 開啟 itm-spo-sdk-java with Maven Project
+1. 開啟 bns-java-client with Maven Project
 2. 點選右邊側欄的 Maven Tools 選擇 execute maven goal
 3. 輸入 `mvn clean package` 並執行
 4. 左邊側欄檔案系統中，右鍵點選的位在 `target` 資料夾中的 `itm-bns-sample-1.1.1-SNAPSHOT.jar` 執行程式
 
 ### 5. 確認執行結果
 
-執行範例程式後，可透過 [BNS Website](https://azure-dev-membership.itm.monster:8088/) 確認範例程式能否將資料傳送至 BNS Server 進行存證上鏈。確認步驟如下 :
+執行範例程式後，可透過 [BNS Website](https://bns.itrustmachines.com/) 確認範例程式能否將資料傳送至 BNS Server 進行存證上鏈。確認步驟如下 :
 
-  1. 用瀏覽器開啟 [BNS Website](https://azure-dev-membership.itm.monster:8088/)
+  1. 用瀏覽器開啟 [BNS Website](https://bns.itrustmachines.com/)
   2. 點擊 Check Records，您便可以查看所有的 ledgerinputs
   3. 選擇其中一個 ledgerinput 的 '+' 圖示，您可以查看該次 legerinput 的所有資訊
   5. 若該筆資料的 Status 顯示綠色 Success 則表示資料已上鏈，反之為灰色 Waiting 等待上鏈中

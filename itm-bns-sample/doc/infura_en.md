@@ -13,5 +13,5 @@
 5. Enter project name，and click CREATE
    ![](https://i.imgur.com/26dhmMa.png)
 
-6. Choose Rinkey in ENDPOINTS MENU，and copy the URL and paste to `nodeURL` columns which in the configuration file [sample.properties](../src/main/resources/sample.properties)
+6. Choose Mainnet in ENDPOINTS MENU，and copy the URL and paste to `nodeURL` columns which in the configuration file [sample.properties](../src/main/resources/sample.properties)
    ![](../image/copy_url.png)

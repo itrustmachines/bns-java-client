@@ -19,7 +19,7 @@ jobs:
       with:
         java-version: 12
     - name: Build with Maven
-      run: mvn clean test
+      run: mvn clean test -s settings.xml
     - name: The job has failed
       if: ${{ failure() }}
       uses: rtCamp/action-slack-notify@master

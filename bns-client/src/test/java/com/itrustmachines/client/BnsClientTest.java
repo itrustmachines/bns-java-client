@@ -23,7 +23,7 @@ public class BnsClientTest {
                                                   .bnsServerUrl(bnsServerUrl)
                                                   .privateKey(privateKey)
                                                   .nodeUrl(
-                                                      "https://rinkeby.infura.io/v3/c889a8d21e2b4179ab331713efb92a7d")
+                                                      "https://goerli.infura.io/v3/c889a8d21e2b4179ab331713efb92a7d")
                                                   .build();
     BnsClientCallback callback = mock(BnsClientCallback.class);
     BnsClientReceiptDao receiptDao = mock(BnsClientReceiptDao.class);
