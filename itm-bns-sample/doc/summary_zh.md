@@ -46,8 +46,6 @@
   final BnsClient bnsClient = BnsClient.init(config, callback, receiptDao);
   ```
 
-- 關於初始化的程式，請參考 [BnsClient.java](../../bns-client/src/main/java/com/itrustmachines/client/BnsClient.java)
-
   ```java
   public static BnsClient init(@NonNull final BnsClientConfig config, @NonNull final BnsClientCallback callback,
       @NonNull final BnsClientReceiptDao receiptDao) {
@@ -77,7 +75,7 @@
 
 - BNS Client 會呼叫 `handleDoneClearanceOrderList` 透過 `doneClearanceOrder` 找出並驗證資料庫中回條的 `clearanceOrder` 小於當前的 `doneClearanceOrder` 並呼叫 `obtainReceiptEvent` 和  `obtainDoneClearanceOrderEvent` callback 將 `receipt` 和 `doneClearanceOrder` 內的資訊回傳。`receipt` 和 `doneClearanceOrder` 位於 `ledgerInputResponse` 內。
   
-- 關於 `ledgerInput` 的程式，請參考 [BnsClient.java](../../bns-client/src/main/java/com/itrustmachines/client/BnsClient.java)
+- 兩種 `ledgerInput` 方式
 
   1. `ledgerInput(@NonNull final String indexValueKey, @NonNull final String cmdJson)`
 

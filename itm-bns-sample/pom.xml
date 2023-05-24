@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.itrustmachines</groupId>
@@ -22,55 +24,43 @@
         <revision>1.1.1-SNAPSHOT</revision>
 
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.24</lombok.version>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-        <commons-lang3.version>3.11</commons-lang3.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
 
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-        <logback.version>1.2.3</logback.version>
+        <logback.version>1.4.1</logback.version>
 
         <!-- https://github.com/web3j/web3j -->
         <!-- https://mvnrepository.com/artifact/org.web3j/core -->
-        <web3j.version>4.8.1</web3j.version>
-
-        <!-- https://mvnrepository.com/artifact/org.web3j/web3j-unit -->
-        <web3j-unit.version>4.8.1</web3j-unit.version>
+        <web3j.version>5.0.0</web3j.version>
 
         <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
-        <okhttp.version>4.9.0</okhttp.version>
+        <okhttp.version>4.10.0</okhttp.version>
 
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <gson.version>2.8.6</gson.version>
+        <gson.version>2.9.1</gson.version>
 
         <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
-        <sqlite-jdbc.version>3.34.0</sqlite-jdbc.version>
+        <sqlite-jdbc.version>3.39.3.0</sqlite-jdbc.version>
 
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-core -->
         <!-- https://mvnrepository.com/artifact/com.j256.ormlite/ormlite-jdbc -->
-        <ormlite.version>5.3</ormlite.version>
+        <ormlite.version>6.1</ormlite.version>
 
         <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
-        <commons-cli.version>1.4</commons-cli.version>
-
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
-        <junit.version>5.7.0</junit.version>
-
-        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
-        <assertj.version>3.17.2</assertj.version>
-
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-        <mockito-core.version>3.5.15</mockito-core.version>
+        <commons-cli.version>1.5.0</commons-cli.version>
 
         <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
-        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     </properties>
 
     <dependencies>
         <!-- ITM SPO SDK -->
         <dependency>
             <groupId>com.itrustmachines</groupId>
-            <artifactId>bns-client</artifactId>
+            <artifactId>bns-java-client-core</artifactId>
             <version>${revision}</version>
         </dependency>
 
@@ -136,41 +126,6 @@
             <artifactId>ormlite-jdbc</artifactId>
             <version>${ormlite.version}</version>
         </dependency>
-
-        <!-- Test -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito-core.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.web3j</groupId>
-            <artifactId>web3j-unit</artifactId>
-            <version>${web3j-unit.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>junit</artifactId>
-                    <groupId>junit</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
     <repositories>
@@ -202,7 +157,7 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-<!--
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -210,7 +165,7 @@
                     <mainClass>com.itrustmachines.sample.BnsClientSample</mainClass>
                 </configuration>
             </plugin>
--->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -243,6 +198,38 @@
             </plugin>
 
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-jar-resource</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/ITM_BNS_SAMPLE-${project.version}
+                            </outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>${artifactId}*.jar</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/src/main/resources</directory>
+                                    <includes>
+                                        <include>log4j.properties</include>
+                                        <include>sample.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

@@ -1,9 +1,12 @@
 package com.itrustmachines.bnsautofolderattest.service;
 
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.annotation.Nullable;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -19,7 +22,6 @@ import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.table.TableUtils;
 
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,18 +29,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AttestationRecordService {
   
-  private final Config config;
+  @Nullable
   private final Cache<String, AttestationRecord> attestedCache;
   private final Dao<AttestationRecord, Long> attestationRecordDao;
   private final ReadWriteLock lock;
   
-  @SneakyThrows
-  public AttestationRecordService(@NonNull final Config config) {
-    this.config = config;
-    final long duration = config.getScanDelay() * 5;
-    this.attestedCache = CacheBuilder.newBuilder()
-                                     .expireAfterAccess(duration > 60 ? duration : 60, TimeUnit.SECONDS)
-                                     .build();
+  public AttestationRecordService(@NonNull final Config config) throws SQLException {
+    if (config.isEnableCache()) {
+      final long duration = config.getScanDelay() * 5;
+      this.attestedCache = CacheBuilder.newBuilder()
+                                       .expireAfterAccess(duration > 60 ? duration : 60, TimeUnit.SECONDS)
+                                       .build();
+    } else {
+      this.attestedCache = null;
+    }
     final JdbcPooledConnectionSource conn = new JdbcPooledConnectionSource(config.getJdbcUrl());
     this.attestationRecordDao = DaoManager.createDao(conn, AttestationRecord.class);
     this.lock = new ReentrantReadWriteLock();
@@ -48,14 +52,13 @@ public class AttestationRecordService {
     log.info("new instance={}", this);
   }
   
-  @SneakyThrows
-  public void save(@NonNull final AttestationRecord attestationRecord) {
+  public void save(@NonNull final AttestationRecord attestationRecord) throws SQLException {
     log.debug("save() attestationRecord={}", attestationRecord);
     lock.writeLock()
         .lock();
     try {
       attestationRecordDao.createOrUpdate(attestationRecord);
-      if (!config.isDisableCache()) {
+      if (attestedCache != null) {
         if (!attestationRecord.getStatus()
                               .isAttested()) {
           return;
@@ -74,8 +77,8 @@ public class AttestationRecordService {
     }
   }
   
-  @SneakyThrows
-  public AttestationRecord findById(@NonNull final Long id) {
+  @Nullable
+  public AttestationRecord findById(@NonNull final Long id) throws SQLException {
     log.debug("findById() start, id={}", id);
     final QueryBuilder<AttestationRecord, Long> queryBuilder = attestationRecordDao.queryBuilder();
     queryBuilder.where()
@@ -92,10 +95,10 @@ public class AttestationRecordService {
     }
   }
   
-  @SneakyThrows
-  public AttestationRecord findLastAttestedByRelativePath(@NonNull final Path relativeFilePath) {
+  @Nullable
+  public AttestationRecord findLastAttestedByRelativePath(@NonNull final Path relativeFilePath) throws SQLException {
     log.debug("findLastAttestedByRelativePath() start, relativeFilePath={}", relativeFilePath);
-    if (!config.isDisableCache()) {
+    if (attestedCache != null) {
       final AttestationRecord attestationRecord = attestedCache.getIfPresent(relativeFilePath.toString());
       if (attestationRecord != null) {
         log.debug("findLastAttestedByRelativePath() end, from cache, attestationRecord={}", attestationRecord);
@@ -106,7 +109,7 @@ public class AttestationRecordService {
     final Where<AttestationRecord, Long> where = queryBuilder.where();
     where.eq(AttestationRecord.STATUS_KEY, AttestationStatus.ATTESTED);
     where.eq(AttestationRecord.STATUS_KEY, AttestationStatus.VERIFIED);
-    where.eq(AttestationRecord.STATUS_KEY, AttestationStatus.VERIFY_FAIL);
+    where.eq(AttestationRecord.STATUS_KEY, AttestationStatus.SAVE_PROOF);
     where.or(3);
     final SelectArg relativeFilePathArg = new SelectArg();
     relativeFilePathArg.setValue(relativeFilePath.toString());
@@ -125,9 +128,9 @@ public class AttestationRecordService {
     }
   }
   
-  @SneakyThrows
+  @Nullable
   public AttestationRecord findLastByCOAndIVAndStatus(@NonNull final Long clearanceOrder,
-      @NonNull final String indexValue, @NonNull final AttestationStatus status) {
+      @NonNull final String indexValue, @NonNull final AttestationStatus status) throws SQLException {
     log.debug("findLastByCOAndIVAndStatus() start, clearanceOrder={}, indexValue={}, status={}", clearanceOrder,
         indexValue, status);
     final QueryBuilder<AttestationRecord, Long> queryBuilder = attestationRecordDao.queryBuilder();

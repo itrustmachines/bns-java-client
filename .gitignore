@@ -36,3 +36,5 @@ dependency-reduced-pom.xml
 .vscode/
 binaryFile/
 *.lock
+### MAC ###
+**/.DS_Store

@@ -1,10 +1,12 @@
 package com.itrustmachines.sample;
 
+import com.itrustmachines.client.account.vo.RegisterRequest;
+import com.itrustmachines.client.account.vo.RegisterToBindingRequest;
 import com.itrustmachines.client.input.vo.LedgerInputRequest;
 import com.itrustmachines.client.input.vo.LedgerInputResponse;
-import com.itrustmachines.client.register.vo.RegisterRequest;
 import com.itrustmachines.client.todo.BnsClientCallback;
 import com.itrustmachines.client.verify.vo.DoneClearanceOrderEvent;
+import com.itrustmachines.client.vo.ClientInfo;
 import com.itrustmachines.client.vo.ReceiptEvent;
 import com.itrustmachines.common.vo.MerkleProof;
 import com.itrustmachines.common.vo.Receipt;
@@ -19,9 +21,13 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 public class CallbackSample implements BnsClientCallback {
-
+  
   @Override
-  public void register(RegisterRequest registerRequest, Boolean registerResult) {
+  public void register(RegisterRequest registerRequest, ClientInfo registerResult) {
+  }
+  
+  @Override
+  public void registerToBinding(RegisterToBindingRequest registerRequest, ClientInfo registerResult) {
   }
   
   @Override
@@ -32,7 +38,6 @@ public class CallbackSample implements BnsClientCallback {
   public void obtainLedgerInputResponse(ReceiptLocator locator, String cmdJson,
       LedgerInputResponse ledgerInputResponse) {
   }
-
   
   @Override
   public void obtainReceiptEvent(ReceiptEvent receiptEvent) {

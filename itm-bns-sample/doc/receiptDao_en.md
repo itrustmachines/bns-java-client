@@ -20,8 +20,6 @@ For the `JDBC_URL` setting, pleaser refer to [BnsClientSample.java](../src/main/
 public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
 ```
 
-Then initialize the `receiptService` by database. For the code of initialize `receiptService`, please refer to [BnsClientReceiptDao.java](../../bns-client/src/main/java/com/itrustmachines/client/todo/BnsClientReceiptDao.java)
-
 ```java
 @SneakyThrows
 ReceiptDaoSample(@NonNull final String jdbcUrl) {
@@ -31,23 +29,7 @@ ReceiptDaoSample(@NonNull final String jdbcUrl) {
 
 #### save
 
-After receiving the ledgerInputResponse, BNS Client will call `handleReceiptEvent` method to extract the receipt from ledgerInputResponse and call `save` method to save the receipt in database.
-
-- For the code of `handleReceiptEvent` method, please refer to [ReceiptEventProcessor.java](../../bns-client/src/main/java/com/itrustmachines/client/service/ReceiptEventProcessor.java)
-
-  ```java
-  public void handleReceiptEvent(final @NonNull ReceiptEvent event) {
-    log.debug("handleReceiptEvent() begin, event={}", event);
-    try {
-      callback.obtainReceiptEvent(event);
-    } catch (Exception e) {
-      ...
-      ...
-    }
-    final boolean isReceiptSaved = receiptService.save(event.getReceipt());
-    log.debug("handleReceiptEvent() end, isReceiptSaved={}", isReceiptSaved);
-  }
-  ```
+After receiving the ledgerInputResponse, BNS Client will extract the receipt from ledgerInputResponse and call `save` method to save the receipt in database.
 
 - For the code of `save` method, please refer to [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -328,33 +310,6 @@ Instead of finding all the receipt, Developer can use this `findAll` method to f
                           .map(this::deleteByLocator)
                           .reduce(Integer::sum)
                           .orElse(0);
-  }
-  ```
-
-#### getNeedVerifyReceiptLocatorMap
-
-- Before verifying the receipt, BNS Client will call `getNeedVerifyReceiptLocatorMap` method to find out which receipts need to be verified. The receipts which need to be verified  are `clearanceOrder` less than BNS Server `doneClearanceOrder`
-
-- [BnsClientReceiptService.java](../../bns-client/src/main/java/com/itrustmachines/client/service/BnsClientReceiptService.java)
-
-  ```java
-  public Map<Long, Set<String>> getNeedVerifyReceiptLocatorMap(final long doneClearanceOrder) {
-    log.debug("getNeedVerifyReceiptLocatorMap() doneClearanceOrder={}", doneClearanceOrder);
-    rwLock.readLock()
-          .lock();
-    try {
-      final Map<Long, Set<String>> result = new LinkedHashMap<>();
-      final List<Long> coList = receiptLocatorsMap.keySet()
-                                                  .stream()
-                                                  .filter(co -> co <= doneClearanceOrder)
-                                                  .sorted(Long::compareTo)
-                                                  .collect(Collectors.toList());
-      coList.forEach(co -> result.put(co, new LinkedHashSet<>(receiptLocatorsMap.get(co))));
-      return result;
-    } finally {
-      rwLock.readLock()
-            .unlock();
-    }
   }
   ```
 

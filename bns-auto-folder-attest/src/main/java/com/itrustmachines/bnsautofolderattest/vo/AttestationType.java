@@ -6,5 +6,17 @@ public enum AttestationType {
   MODIFIED, //
   ATTESTED, //
   UNKNOWN, //
-
+  ;
+  
+  public static boolean isNeedAttestation(final AttestationType type) {
+    switch (type) {
+      case ADDED:
+      case MODIFIED:
+        return true;
+      case ATTESTED:
+      case UNKNOWN:
+      default:
+        return false;
+    }
+  }
 }

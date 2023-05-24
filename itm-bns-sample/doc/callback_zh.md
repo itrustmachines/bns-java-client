@@ -34,7 +34,7 @@ BNS Client 初始化時，會向 BNS Server 請求註冊 `registerRequest`。BNS
 
 - 開發者可在 [CallbackSample.java](../src/main/java/com/itrustmachines/sample/CallbackSample.java) 的 `register` 方法撰寫程式將 `registerRequest` 和 `registerResult` Callback 至自己的系統
 
-- [RegisterRequest.java](../../bns-client/src/main/java/com/itrustmachines/client/register/vo/RegisterRequest.java)
+- `RegisterRequest`
 
   ```java
   public class RegisterRequest implements Serializable, Cloneable {
@@ -62,7 +62,7 @@ BNS Client 初始化成功後，會將 `CMD`, `timestamp`資訊建立為 ledgerI
 
 - **建議實作時可將 `ledgerInputRequest` 中的 `clearanceOrder` 和 `indexValue` 儲存至 `receiptLocator`** 方便日後搜尋資料
 
-- [LedgerInputRequest.java](../../bns-client/src/main/java/com/itrustmachines/client/input/vo/LedgerInputRequest.java)
+- `LedgerInputRequest`
   ```java
   public class LedgerInputRequest implements Serializable, Cloneable {
     private String callerAddress;   // MetaMask 錢包位址
@@ -92,7 +92,7 @@ BNS Client 初始化成功後，會將 `CMD`, `timestamp`資訊建立為 ledgerI
 
 - **建議實作時可將 `ledgerInputResponse` 中的 `clearanceOrder` 和 `indexValue` 儲存至 `receiptLocator`**，方便日後搜尋資料
 
-- [LedgerInputResponse.java](../../bns-client/src/main/java/com/itrustmachines/client/input/vo/LedgerInputResponse.java)
+- `LedgerInputResponse`
   ```java
   public class LedgerInputResponse {
     private String status;                      // ledgerInput 的狀態
@@ -118,7 +118,7 @@ BNS Client 初始化成功後，會將 `CMD`, `timestamp`資訊建立為 ledgerI
 
 - **建議實作時建議將回條 `receipt` 中的 `indexValue` 和 `clearanceOrder` Callback 至自己系統，以方便搜尋回條資料**
 
-- [Receipt.java](../../spo-common-domain-objects/src/main/java/com/itrustmachines/common/vo/Receipt.java)
+- `Receipt`
   ```java
   public class Receipt implements Serializable, Cloneable {
     private String callerAddress;       // MetaMask 錢包位址
@@ -148,7 +148,7 @@ BNS Client 初始化成功後，會將 `CMD`, `timestamp`資訊建立為 ledgerI
 
 - 開發者可在 [CallbackSample.java](../src/main/java/com/itrustmachines/sample/CallbackSample.java) 的 `obtainDoneClearanceOrderEvent` 撰寫程式將 `doneClearanceOrder` 的資訊 Callback
 
-- [DoneClearanceOrderEvent.java](../../bns-client/src/main/java/com/itrustmachines/client/verify/vo/DoneClearanceOrderEvent.java)
+- `DoneClearanceOrderEvent`
   
   ```java
   public class DoneClearanceOrderEvent {
@@ -171,7 +171,7 @@ BNS Client 初始化成功後，會將 `CMD`, `timestamp`資訊建立為 ledgerI
 
 - 開發者可在 [CallbackSample.java](../src/main/java/com/itrustmachines/sample/CallbackSample.java) 的 `obtainMerkleProof` 撰寫程式將 `merkleProof` 的資訊 Callback 至自己的系統
 
-- [MerkleProof.java](../../spo-common-domain-objects/src/main/java/com/itrustmachines/common/vo/MerkleProof.java)
+- `MerkleProof`
 
   ```java
   public class MerkleProof implements Serializable {
@@ -199,7 +199,7 @@ BNS Client 初始化成功後，會將 `CMD`, `timestamp`資訊建立為 ledgerI
  
 - **建議實作將 `verifyReceiptResult` 中的 `indexValue` 和 `clearanceOrder` Callback，才能更新驗證資料**
 
-- [VerifyReceiptAndMerkleProofResult.java](../../spo-common-verification/src/main/java/com/itrustmachines/verification/vo/VerifyReceiptAndMerkleProofResult.java)
+- `VerifyReceiptAndMerkleProofResult`
 
   ```java
   public class VerifyReceiptAndMerkleProofResult {

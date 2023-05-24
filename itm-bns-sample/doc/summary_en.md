@@ -60,8 +60,6 @@ Initialize the BNS Client with configuration file, callback and receiptDao. When
   final BnsClient bnsClient = BnsClient.init(config, callback, receiptDao);
   ```
 
-- For the code of initialization, please refer to [BnsClient.java](../../bns-client/src/main/java/com/itrustmachines/client/BnsClient.java)
-
 ### LedgerInput
 
 - After successfully initializing the BNS Client, BNS Client will convert `CMD` to JSON data type, `cmdJSON`, and do the ledgerInput. Check [Build the CMD](./cmd_en.md) for more information.
@@ -76,7 +74,7 @@ Initialize the BNS Client with configuration file, callback and receiptDao. When
 
 - BNS Client will call `obtainReceiptEvent` and  `obtainDoneClearanceOrderEvent` callback methods to send the information in `receipt` and `doneClearanceOrder`. The `receipt` and `doneClearanceOrder` are contained in `ledgerInputResponse`.
   
-- For the code of `ledgerInput`, Please refer to [BnsClient.java](../../bns-client/src/main/java/com/itrustmachines/client/BnsClient.java)
+- Two ways of `ledgerInput`
 
   1. `ledgerInput(@NonNull final KeyInfo keyInfo, @NonNull final String cmdJson)`
 

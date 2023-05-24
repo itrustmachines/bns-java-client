@@ -1,7 +1,7 @@
 package com.itrustmachines.bnsautofolderattest.bns.service;
 
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 
 import com.itrustmachines.client.todo.BnsClientReceiptDao;
 import com.itrustmachines.common.vo.Receipt;
@@ -21,95 +21,38 @@ public class BnsClientReceiptDaoImpl implements BnsClientReceiptDao {
   
   private final ReceiptService receiptService;
   
-  @SneakyThrows
-  public BnsClientReceiptDaoImpl(@NonNull final String jdbcUrl) {
+  public BnsClientReceiptDaoImpl(@NonNull final String jdbcUrl) throws SQLException {
     this.receiptService = new ReceiptService(new JdbcPooledConnectionSource(jdbcUrl));
   }
   
   // 儲存每次Ledger input完對應的Receipt
+  @SneakyThrows
   @Override
-  public boolean save(@NonNull final Receipt receipt) {
-    log.debug("save() start, receipt={}", receipt);
-    final Receipt savedReceipt = receiptService.save(receipt);
-    log.debug("save() end, savedReceipt={}", savedReceipt);
-    return Objects.nonNull(savedReceipt);
+  public void save(@NonNull final Receipt receipt) {
+    log.info("save() start, receipt={}", receipt);
+    receiptService.save(receipt);
+    log.info("save() end");
   }
   
+  @SneakyThrows
   @Override
-  public boolean saveAll(@NonNull final List<Receipt> receipts) {
-    log.debug("saveAll() start, receiptsSize={}", receipts.size());
-    final List<Receipt> savedReceipts = receiptService.saveAll(receipts);
-    log.debug("saveAll() end, savedReceiptsSize={}", savedReceipts.size());
-    return receipts.size() == savedReceipts.size();
-  }
-  
-  @Override
-  public List<Receipt> findAll() {
-    log.debug("findAll() start");
-    final List<Receipt> receipts = receiptService.findAll();
-    log.debug("findAll() end, receiptsSize={}", receipts.size());
-    return receipts;
-  }
-  
-  @Override
-  public List<Receipt> findAll(final int pageNumber, final int pageSize) {
-    log.debug("findAll() start, pageNumber={}, pageSize={}", pageNumber, pageSize);
-    final List<Receipt> receipts = receiptService.findAll(pageNumber, pageSize);
-    log.debug("findAll() end, receiptsSize={}", receipts.size());
-    return receipts;
-  }
-  
-  @Override
-  public long countAll() {
-    log.debug("countAll() start");
-    final long size = receiptService.countAll();
-    log.debug("countAll() end, size={}", size);
-    return size;
-  }
-  
-  @Override
-  public Receipt findByLocator(@NonNull final ReceiptLocator receiptLocator) {
-    log.debug("findByLocator() start, receiptLocator={}", receiptLocator);
-    final Receipt receipt = receiptService.findByLocator(receiptLocator);
-    log.debug("findByLocator() end, receipt={}", receipt);
-    return receipt;
-  }
-  
-  @Override
-  public List<Receipt> findByLocators(@NonNull final List<ReceiptLocator> receiptLocators) {
-    log.debug("findByLocators() start, receiptLocatorsSize={}", receiptLocators.size());
-    final List<Receipt> result = receiptService.findByLocators(receiptLocators);
-    log.debug("findByLocators() end, resultSize={}", result.size());
-    return result;
+  public List<Receipt> findPageByNotVerifiedAndAddressEqualsIgnoreCaseAndClearanceOrderLessThenEqual(String address,
+      long clearanceOrder, int pageNumber, int pageSize) {
+    return receiptService.findPageByNotVerifiedAndAddressEqualsIgnoreCaseAndClearanceOrderLessThenEqual(address,
+        clearanceOrder, pageNumber, pageSize);
   }
   
   // 將已經驗證完成的Receipt刪除
+  @SneakyThrows
   @Override
-  public boolean delete(@NonNull final Receipt receipt) {
+  public void delete(@NonNull final Receipt receipt, boolean verifyPassed) {
     log.debug("delete() start, receipt={}", receipt);
     final ReceiptLocator receiptLocator = ReceiptLocator.builder()
                                                         .clearanceOrder(receipt.getClearanceOrder())
                                                         .indexValue(receipt.getIndexValue())
                                                         .build();
-    final int deleteCount = receiptService.deleteByLocator(receiptLocator);
-    log.debug("delete() end, deleteCount={}", deleteCount);
-    return deleteCount == 1;
-  }
-  
-  @Override
-  public boolean deleteAll(@NonNull final List<Receipt> receipts) {
-    log.debug("deleteAll() start, receiptsSize={}", receipts.size());
-    final int deleteCount = receiptService.deleteAll();
-    log.debug("deleteAll() end, deleteCount={}", deleteCount);
-    return deleteCount >= 0;
-  }
-  
-  @Override
-  public boolean deleteAllByLocators(@NonNull final List<ReceiptLocator> receiptLocators) {
-    log.debug("deleteAllByLocators() start, receiptLocatorsSize={}", receiptLocators.size());
-    final int deleteCount = receiptService.deleteByLocatorList(receiptLocators);
-    log.debug("deleteAllByLocators() end, deleteCount={}", deleteCount);
-    return deleteCount == receiptLocators.size();
+    receiptService.deleteByLocator(receiptLocator);
+    log.debug("delete() end");
   }
   
 }
