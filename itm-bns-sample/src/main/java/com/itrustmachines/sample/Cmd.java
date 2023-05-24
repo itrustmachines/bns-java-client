@@ -10,7 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Cmd {
-
+  
+  // for BNS frontend
+  String text;
+  String description;
+  
   String deviceId;
   Long timestamp;
   Double watt;

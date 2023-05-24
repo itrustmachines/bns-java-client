@@ -1,5 +1,6 @@
 package com.itrustmachines.sample;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,6 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.table.TableUtils;
 
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,8 +28,7 @@ public class ReceiptService {
   private final Dao<SigServerEntity, Long> sigServerDao;
   private final Dao<ReceiptEntity, Long> receiptDao;
   
-  @SneakyThrows
-  public ReceiptService(@NonNull final JdbcPooledConnectionSource conn) {
+  public ReceiptService(@NonNull final JdbcPooledConnectionSource conn) throws SQLException {
     this.sigClientDao = DaoManager.createDao(conn, SigClientEntity.class);
     this.sigServerDao = DaoManager.createDao(conn, SigServerEntity.class);
     this.receiptDao = DaoManager.createDao(conn, ReceiptEntity.class);
@@ -41,36 +40,25 @@ public class ReceiptService {
     log.info("new instance={}", this);
   }
   
-  @SneakyThrows
-  private ReceiptEntity save(@NonNull final ReceiptEntity receiptEntity) {
+  @SuppressWarnings("UnusedReturnValue")
+  private ReceiptEntity save(@NonNull final ReceiptEntity receiptEntity) throws SQLException {
     sigClientDao.createIfNotExists(receiptEntity.getSigClient());
     sigServerDao.createIfNotExists(receiptEntity.getSigServer());
     return receiptDao.createIfNotExists(receiptEntity);
   }
   
-  public Receipt save(@NonNull final Receipt receipt) {
-    final ReceiptEntity createEntity = save(ReceiptUtil.toEntity(receipt));
-    return ReceiptUtil.toDomain(createEntity);
+  public void save(@NonNull final Receipt receipt) throws SQLException {
+    save(ReceiptUtil.toEntity(receipt));
   }
   
-  public List<Receipt> saveAll(@NonNull final List<Receipt> receipts) {
-    return receipts.stream()
-                   .map(this::save)
-                   .collect(Collectors.toList());
-  }
-  
-  @SneakyThrows
-  public List<Receipt> findAll() {
-    return receiptDao.queryForAll()
-                     .stream()
-                     .map(ReceiptUtil::toDomain)
-                     .collect(Collectors.toList());
-  }
-  
-  @SneakyThrows
-  public List<Receipt> findAll(final int pageNumber, final int pageSize) {
+  public List<Receipt> findPageByNotVerifiedAndAddressEqualsIgnoreCaseAndClearanceOrderLessThenEqual(String address,
+      long clearanceOrder, int pageNumber, int pageSize) throws SQLException {
     final QueryBuilder<ReceiptEntity, Long> queryBuilder = receiptDao.queryBuilder();
-    queryBuilder.offset((long) (pageNumber * pageSize))
+    queryBuilder.where()
+                .like(ReceiptEntity.CALLER_ADDRESS_KEY, address)
+                .and()
+                .eq(ReceiptEntity.CLEARANCE_ORDER_KEY, clearanceOrder);
+    queryBuilder.offset(((long) pageNumber * pageSize))
                 .limit((long) pageSize);
     return queryBuilder.query()
                        .stream()
@@ -78,52 +66,14 @@ public class ReceiptService {
                        .collect(Collectors.toList());
   }
   
-  @SneakyThrows
-  public long countAll() {
-    return receiptDao.countOf();
-  }
-  
-  @SneakyThrows
-  public Receipt findByLocator(@NonNull final ReceiptLocator receiptLocator) {
-    final QueryBuilder<ReceiptEntity, Long> queryBuilder = receiptDao.queryBuilder();
-    queryBuilder.where()
-                .eq(ReceiptEntity.CLEARANCE_ORDER_KEY, receiptLocator.getClearanceOrder())
-                .and()
-                .eq(ReceiptEntity.INDEX_VALUE_KEY, receiptLocator.getIndexValue());
-    final ReceiptEntity entity = queryBuilder.queryForFirst();
-    return ReceiptUtil.toDomain(entity);
-  }
-  
-  public List<Receipt> findByLocators(@NonNull final List<ReceiptLocator> receiptLocators) {
-    return receiptLocators.stream()
-                          .map(this::findByLocator)
-                          .collect(Collectors.toList());
-  }
-  
-  @SneakyThrows
-  public int deleteByLocator(@NonNull final ReceiptLocator receiptLocator) {
+  public void deleteByLocator(@NonNull final ReceiptLocator receiptLocator) throws SQLException {
     DeleteBuilder<ReceiptEntity, Long> deleteBuilder = receiptDao.deleteBuilder();
     deleteBuilder.where()
                  .eq(ReceiptEntity.INDEX_VALUE_KEY, receiptLocator.getIndexValue())
                  .and()
                  .eq(ReceiptEntity.CLEARANCE_ORDER_KEY, receiptLocator.getClearanceOrder());
     PreparedDelete<ReceiptEntity> preparedDelete = deleteBuilder.prepare();
-    return receiptDao.delete(preparedDelete);
-  }
-  
-  @SneakyThrows
-  public int deleteAll() {
-    final DeleteBuilder<ReceiptEntity, Long> deleteBuilder = receiptDao.deleteBuilder();
-    deleteBuilder.where();
-    final PreparedDelete<ReceiptEntity> preparedDelete = deleteBuilder.prepare();
-    return receiptDao.delete(preparedDelete);
-  }
-  
-  public int deleteByLocatorList(@NonNull final List<ReceiptLocator> receiptLocators) {
-    return receiptLocators.stream()
-                          .map(this::deleteByLocator)
-                          .reduce(Integer::sum)
-                          .orElse(0);
+    receiptDao.delete(preparedDelete);
   }
   
 }

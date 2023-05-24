@@ -6,19 +6,17 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import com.itrustmachines.common.vo.Receipt;
 import com.j256.ormlite.field.DatabaseField;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class AttestationRecord {
+public class AttestationRecord implements CsvWritable {
   
   public static final String ID_KEY = "id";
   public static final String RELATIVE_FILE_PATH_KEY = "relativeFilePath";
@@ -153,4 +151,58 @@ public class AttestationRecord {
     proofPath = Paths.get(filePathStr);
   }
   
+  @NonNull
+  public static AttestationRecord of(@NonNull final FileInfo fileInfo, @NonNull final Cmd cmd) {
+    final AttestationRecord record = new AttestationRecord();
+    record.setType(fileInfo.getType());
+    record.setStatus(fileInfo.getStatus());
+    record.setFilePath(fileInfo.getFilePath());
+    record.setRelativeFilePath(fileInfo.getRelativeFilePath());
+    record.setLastModifiedTime(fileInfo.getLastModifiedTime());
+    record.setFileHash(fileInfo.getFileHash());
+    record.setPreviousRecord(fileInfo.getPreviousRecord());
+    record.setAttestTimeLong(cmd.getTimestamp());
+    return record;
+  }
+  
+  public void updateByReceipt(@NonNull final Receipt receipt) {
+    status = AttestationStatus.ATTESTED;
+    address = receipt.getCallerAddress();
+    clearanceOrder = receipt.getClearanceOrder();
+    indexValue = receipt.getIndexValue();
+  }
+  
+  @Override
+  @NonNull
+  public String getHeader() {
+    return "Attestation Type" + "," // 1
+        + "Attestation Status" + "," // 2
+        + "Relative File Path" + "," // 3
+        + "Last Modified Time" + "," // 4
+        + "File Hash" + "," // 5
+        + "Address" + "," // 6
+        + "Clearance Order" + "," // 7
+        + "Index Value" + "," // 8
+        + "Proof Path" + "," // 9
+        + "Previous Modified Time" + "," // 10
+        + "Previous File Hash" + "," // 11
+        + "\n";
+  }
+  
+  @Override
+  @NonNull
+  public String toCsvString() {
+    return type + "," // 1
+        + status + "," // 2
+        + relativeFilePath + "," // 3
+        + lastModifiedTime + "," // 4
+        + fileHash + "," // 5
+        + address + "," // 6
+        + clearanceOrder + "," // 7
+        + indexValue + "," // 8
+        + (AttestationStatus.SAVE_PROOF == getStatus() ? proofPath : "") + "," // 9
+        + (AttestationType.MODIFIED == getType() ? previousRecord.getLastModifiedTime() : "") + "," // 10
+        + (AttestationType.MODIFIED == getType() ? previousRecord.getFileHash() : "") + "," // 11
+        + "\n";
+  }
 }

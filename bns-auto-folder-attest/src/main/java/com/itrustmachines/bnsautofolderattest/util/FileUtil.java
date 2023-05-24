@@ -3,21 +3,24 @@ package com.itrustmachines.bnsautofolderattest.util;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import lombok.NonNull;
+import com.itrustmachines.bnsautofolderattest.exception.InitializationException;
 
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class FileUtil {
   
-  public static String findFile(@NonNull final String fileName, @NonNull final String[] propPathList) {
+  public static String findFile(@NonNull final String[] propPathList) throws InitializationException {
     String filePath = null;
     for (final String propPath : propPathList) {
-      final String propFilePath = propPath + fileName;
-      if (Files.isRegularFile(Paths.get(propFilePath))) {
-        filePath = propFilePath;
+      if (Files.isRegularFile(Paths.get(propPath))) {
+        filePath = propPath;
         break;
       }
     }
     if (filePath == null) {
-      throw new RuntimeException(fileName + " not found!");
+      throw new InitializationException(propPathList[0] + " not found!");
     }
     return filePath;
   }

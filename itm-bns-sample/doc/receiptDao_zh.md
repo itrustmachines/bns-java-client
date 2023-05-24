@@ -12,8 +12,6 @@
 public static String JDBC_URL = "jdbc:sqlite:BnsDevice.db";
 ```
 
-在 [BnsClientReceiptDao.java](../../bns-client/src/main/java/com/itrustmachines/client/todo/BnsClientReceiptDao.java) 中，會根據 `jdbcUrl` 建立一個資料庫並作為後續 BNS Client 存取回條的存取位置
-
 ```java
 @SneakyThrows
 ReceiptDaoSample(@NonNull final String jdbcUrl) {
@@ -23,23 +21,7 @@ ReceiptDaoSample(@NonNull final String jdbcUrl) {
 
 #### save 說明
 
-BNS Client 收到 `ledgerInputResponse`  後，會呼叫 `handleReceiptEvent` 方法將回條從 `ledgerInputResponse` 取出，並透過 `save` 方法儲存於資料庫
-
-- 關於 `handleReceiptEvent` 方法的程式, 請參考 [ReceiptEventProcessor.java](../../bns-client/src/main/java/com/itrustmachines/client/service/ReceiptEventProcessor.java)
-
-  ```java
-  public void handleReceiptEvent(final @NonNull ReceiptEvent event) {
-    log.debug("handleReceiptEvent() begin, event={}", event);
-    try {
-      callback.obtainReceiptEvent(event);
-    } catch (Exception e) {
-      ...
-      ...
-    }
-    final boolean isReceiptSaved = receiptService.save(event.getReceipt());
-    log.debug("handleReceiptEvent() end, isReceiptSaved={}", isReceiptSaved);
-  }
-  ```
+BNS Client 收到 `ledgerInputResponse`  後，會將回條從 `ledgerInputResponse` 取出，並透過 `save` 方法儲存於資料庫
 
 - 關於 `save` 方法的程式, 請參考 [ReceiptDaoSample.java](../src/main/java/com/itrustmachines/sample/ReceiptDaoSample.java)
 
@@ -323,32 +305,6 @@ BNS Client 收到 `ledgerInputResponse`  後，會呼叫 `handleReceiptEvent` �
   }
   ```
 
-#### getNeedVerifyReceiptLocatorMap 說明
-
-- BNS Client 驗證回條前，會先呼叫 `getNeedVerifyReceiptLocatorMap` 尋找待驗證回條。待驗證回條為 clearanceOrder 小於目前 BNS Server 的 `doneClearanceOrder`
-
-- [BnsClientReceiptService.java](../../bns-client/src/main/java/com/itrustmachines/client/service/BnsClientReceiptService.java)
-
-  ```java
-  public Map<Long, Set<String>> getNeedVerifyReceiptLocatorMap(final long doneClearanceOrder) {
-    log.debug("getNeedVerifyReceiptLocatorMap() doneClearanceOrder={}", doneClearanceOrder);
-    rwLock.readLock()
-          .lock();
-    try {
-      final Map<Long, Set<String>> result = new LinkedHashMap<>();
-      final List<Long> coList = receiptLocatorsMap.keySet()
-                                                  .stream()
-                                                  .filter(co -> co <= doneClearanceOrder)
-                                                  .sorted(Long::compareTo)
-                                                  .collect(Collectors.toList());
-      coList.forEach(co -> result.put(co, new LinkedHashSet<>(receiptLocatorsMap.get(co))));
-      return result;
-    } finally {
-      rwLock.readLock()
-            .unlock();
-    }
-  }
-  ```
 
 您現在已經了解 BNS Client receiptDao 的功能。接下來我們將引導您了解並調整 BNS Client 的其他設定
 

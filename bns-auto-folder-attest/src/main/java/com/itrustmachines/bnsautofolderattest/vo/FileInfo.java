@@ -3,20 +3,18 @@ package com.itrustmachines.bnsautofolderattest.vo;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class FileInfo {
   
-  private AttestationType type;
-  private AttestationStatus status;
+  private AttestationType type = AttestationType.UNKNOWN;
+  private AttestationStatus status = AttestationStatus.UNKNOWN;
   private Path filePath;
   private Path relativeFilePath;
   private ZonedDateTime lastModifiedTime;
@@ -33,12 +31,7 @@ public class FileInfo {
     if (lastModifiedTimeNotEqual) {
       return true;
     }
-    final boolean fileHashNotEqual = !attestationRecord.getFileHash()
-                                                       .equalsIgnoreCase(fileHash);
-    if (fileHashNotEqual) {
-      return true;
-    }
-    return false;
+    return !StringUtils.equalsIgnoreCase(attestationRecord.getFileHash(), fileHash);
   }
   
 }

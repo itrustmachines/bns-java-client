@@ -1,63 +1,85 @@
 package com.itrustmachines.bnsautofolderattest.service;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.itrustmachines.bnsautofolderattest.bns.service.BnsClientReceiptDaoImpl;
 import com.itrustmachines.bnsautofolderattest.callback.Callback;
 import com.itrustmachines.bnsautofolderattest.config.Config;
-import com.itrustmachines.bnsautofolderattest.vo.AttestationRecord;
-import com.itrustmachines.bnsautofolderattest.vo.AttestationStatus;
-import com.itrustmachines.bnsautofolderattest.vo.AttestationType;
-import com.itrustmachines.bnsautofolderattest.vo.Cmd;
-import com.itrustmachines.bnsautofolderattest.vo.FileInfo;
-import com.itrustmachines.bnsautofolderattest.vo.ScanResult;
+import com.itrustmachines.bnsautofolderattest.exception.CallbackException;
+import com.itrustmachines.bnsautofolderattest.exception.InitializationException;
+import com.itrustmachines.bnsautofolderattest.exception.ScanException;
+import com.itrustmachines.bnsautofolderattest.vo.*;
 import com.itrustmachines.client.BnsClient;
+import com.itrustmachines.client.account.vo.RegisterRequest;
+import com.itrustmachines.client.account.vo.RegisterToBindingRequest;
+import com.itrustmachines.client.config.BnsClientConfig;
+import com.itrustmachines.client.exception.BnsClientException;
+import com.itrustmachines.client.input.vo.LedgerInputRequest;
 import com.itrustmachines.client.input.vo.LedgerInputResponse;
-import com.itrustmachines.common.constants.StatusConstantsString;
+import com.itrustmachines.client.todo.BnsClientCallback;
+import com.itrustmachines.client.verify.vo.DoneClearanceOrderEvent;
+import com.itrustmachines.client.vo.ClientInfo;
+import com.itrustmachines.client.vo.ReceiptEvent;
 import com.itrustmachines.common.util.HashUtils;
+import com.itrustmachines.common.vo.MerkleProof;
+import com.itrustmachines.common.vo.Receipt;
+import com.itrustmachines.common.vo.ReceiptLocator;
+import com.itrustmachines.verification.vo.VerificationProof;
+import com.itrustmachines.verification.vo.VerifyReceiptAndMerkleProofResult;
 
-import lombok.NonNull;
-import lombok.ToString;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-@ToString(exclude = { "gson" })
+@ToString(exclude = { "gson", "bnsClient" })
 @Slf4j
-public class AttestService {
+public class AttestService implements BnsClientCallback {
   
   private final Config config;
+  @NonNull
   private final Path rootFolderPath;
+  @NonNull
   private final AttestationRecordService attestationRecordService;
-  private final BnsClient bnsClient;
+  @NonNull
   private final Callback callback;
+  @Getter(AccessLevel.PUBLIC)
+  @NonNull
+  private final BnsClient bnsClient;
+  @NonNull
   private final Gson gson;
   
-  public AttestService(@NonNull final Config config, @NonNull final AttestationRecordService attestationRecordService,
-      @NonNull final BnsClient bnsClient, @NonNull final Callback callback) {
+  public AttestService(@NonNull final Config config, BnsClientConfig bnsClientConfig)
+      throws InitializationException, SQLException {
     this.config = config;
     this.rootFolderPath = config.getRootFolderPath();
-    this.attestationRecordService = attestationRecordService;
-    this.bnsClient = bnsClient;
-    this.callback = callback;
+    this.attestationRecordService = new AttestationRecordService(config);
+    this.callback = new CallbackImpl(config.getHistoryCsvPath(), config.getScanHistoryCsvPath());
+    try {
+      this.bnsClient = BnsClient.init(bnsClientConfig, this, new BnsClientReceiptDaoImpl(config.getJdbcUrl()));
+    } catch (BnsClientException | SQLException e) {
+      throw new InitializationException(e);
+    }
     this.gson = new GsonBuilder().disableHtmlEscaping()
                                  .create();
     
     log.info("new instance={}", this);
   }
   
-  public void process() {
+  public void process() throws CallbackException, SQLException, ScanException {
     log.debug("process() start");
     
     final List<FileInfo> toAttestFileList = scan();
@@ -69,65 +91,80 @@ public class AttestService {
     log.debug("process() end");
   }
   
-  public List<FileInfo> scan() {
+  @NonNull
+  public List<FileInfo> scan() throws CallbackException, SQLException, ScanException {
     log.debug("scan() start, rootFolderPath={}", rootFolderPath);
-    final List<FileInfo> toAttestFileInfoList = new ArrayList<>();
-    final ZonedDateTime startTime = ZonedDateTime.now();
+    final ScanResult scanResult = new ScanResult();
+    scanResult.setStartTime(ZonedDateTime.now());
+    
     final List<Path> filePathList;
-    try {
-      filePathList = Files.walk(rootFolderPath)
-                          .filter(path -> !Files.isDirectory(path))
-                          .collect(Collectors.toList());
+    try (final Stream<Path> pathStream = Files.walk(rootFolderPath)) {
+      filePathList = pathStream.filter(path -> !Files.isDirectory(path))
+                               .collect(Collectors.toList());
     } catch (IOException e) {
-      log.error("scan() folder scan error", e);
-      return new ArrayList<>();
+      throw new ScanException(e);
     }
     
-    final List<FileInfo> fileInfoList = filePathList.stream()
-                                                    .map(this::getFileInfo)
-                                                    .filter(Objects::nonNull)
-                                                    .map(this::checkAddedAndModified)
-                                                    .collect(Collectors.toList());
-    log.debug("scan() fileInfoList.size={}", fileInfoList.size());
-    int totalCount = fileInfoList.size();
-    long totalBytes = fileInfoList.stream()
-                                  .map(FileInfo::getFilePath)
-                                  .map(Path::toFile)
-                                  .map(File::length)
-                                  .reduce(0L, Long::sum);
-    final long addedCount = fileInfoList.stream()
-                                        .filter(fileInfo -> AttestationType.ADDED == fileInfo.getType())
-                                        .peek(toAttestFileInfoList::add)
-                                        .count();
-    final long modifiedCount = fileInfoList.stream()
-                                           .filter(fileInfo -> AttestationType.MODIFIED == fileInfo.getType())
-                                           .peek(toAttestFileInfoList::add)
-                                           .count();
-    final long attestedCount = fileInfoList.stream()
-                                           .filter(fileInfo -> AttestationType.ATTESTED == fileInfo.getType())
-                                           .count();
-    final long unknownCount = fileInfoList.stream()
-                                          .filter(fileInfo -> AttestationType.UNKNOWN == fileInfo.getType())
-                                          .count();
-    log.info("scan() end, total={}, totalBytes={}, added={}, modified={}, attested={}, unknown={}", totalCount,
-        totalBytes, addedCount, modifiedCount, attestedCount, unknownCount);
-    try {
-      callback.onScanResult(ScanResult.builder()
-                                      .startTime(startTime)
-                                      .totalCount(totalCount)
-                                      .totalBytes(totalBytes)
-                                      .addedCount(addedCount)
-                                      .modifiedCount(modifiedCount)
-                                      .attestedCount(attestedCount)
-                                      .endTime(ZonedDateTime.now())
-                                      .build());
-    } catch (Exception e) {
-      log.warn("onAttested() callback error", e);
+    final List<FileInfo> fileInfoList = new ArrayList<>();
+    for (final Path p : filePathList) {
+      final FileInfo fileInfo = getFileInfo(p);
+      fileInfoList.add(fileInfo);
     }
+    log.debug("scan() fileInfoList.size={}", fileInfoList.size());
+    
+    computeScanResult(fileInfoList, scanResult);
+    scanResult.setEndTime(ZonedDateTime.now());
+    callback.onScanResult(scanResult);
+    
+    final List<FileInfo> toAttestFileInfoList = fileInfoList.stream()
+                                                            .filter(fileInfo -> AttestationType.isNeedAttestation(
+                                                                fileInfo.getType()))
+                                                            .collect(Collectors.toList());
+    log.debug("scan() toAttestFileInfoList.size={}", toAttestFileInfoList.size());
     return toAttestFileInfoList;
   }
   
-  public void attestAll(@NonNull final List<FileInfo> toAttestFileInfoList) {
+  private static void computeScanResult(@NonNull final List<FileInfo> fileInfoList,
+      @NonNull final ScanResult scanResult) throws ScanException {
+    int totalCount = fileInfoList.size();
+    long totalBytes = 0;
+    long addedCount = 0;
+    long modifiedCount = 0;
+    long attestedCount = 0;
+    long unknownCount = 0;
+    for (FileInfo fileInfo : fileInfoList) {
+      try {
+        totalBytes += Files.size(fileInfo.getFilePath());
+      } catch (IOException e) {
+        throw new ScanException(e);
+      }
+      switch (fileInfo.getType()) {
+        case ADDED:
+          addedCount++;
+          break;
+        case MODIFIED:
+          modifiedCount++;
+          break;
+        case ATTESTED:
+          attestedCount++;
+          break;
+        case UNKNOWN:
+        default:
+          unknownCount++;
+          break;
+      }
+    }
+    
+    scanResult.setTotalCount(totalCount);
+    scanResult.setTotalBytes(totalBytes);
+    scanResult.setAddedCount(addedCount);
+    scanResult.setModifiedCount(modifiedCount);
+    scanResult.setAttestedCount(attestedCount);
+    log.info("computeScanResult() end, total={}, totalBytes={}, added={}, modified={}, attested={}, unknown={}",
+        totalCount, totalBytes, addedCount, modifiedCount, attestedCount, unknownCount);
+  }
+  
+  public void attestAll(@NonNull final List<FileInfo> toAttestFileInfoList) throws CallbackException, SQLException {
     log.debug("attestAll() start, toAttestFileInfoList.size={}", toAttestFileInfoList.size());
     long attestedCount = 0;
     long attestFailCount = 0;
@@ -136,15 +173,18 @@ public class AttestService {
       final AttestationRecord attestationRecord = attest(fileInfo);
       switch (attestationRecord.getStatus()) {
         case ATTESTED:
-          onAttested(attestationRecord);
+          attestationRecordService.save(attestationRecord);
+          callback.onAttested(attestationRecord);
           attestedCount++;
           break;
         case FAIL:
-          onAttestFail(attestationRecord);
+          attestationRecordService.save(attestationRecord);
+          callback.onAttestFail(attestationRecord);
           attestFailCount++;
           break;
         case UNKNOWN:
-          onAttestFail(attestationRecord);
+          attestationRecordService.save(attestationRecord);
+          callback.onAttestFail(attestationRecord);
           unknownCount++;
           break;
       }
@@ -153,37 +193,21 @@ public class AttestService {
     log.info("attestAll() end, attested={}, attestFail={}, unknown={}", attestedCount, attestFailCount, unknownCount);
   }
   
-  @Nullable
-  private FileInfo getFileInfo(@NonNull final Path filePath) {
-    log.debug("getFileInfo() start, filePath={}", filePath);
-    final Path relativeFilePath = rootFolderPath.relativize(filePath);
-    final ZonedDateTime lastModifiedTime;
-    try {
-      lastModifiedTime = Files.getLastModifiedTime(filePath)
-                              .toInstant()
-                              .atZone(ZoneId.systemDefault())
-                              .truncatedTo(ChronoUnit.MILLIS);
-    } catch (IOException e) {
-      log.error("getFileInfo() get lastModifiedTime error, filePath={}", filePath, e);
-      return null;
-    }
-    final String fileHash = HashUtils.sha256(filePath.toFile());
-    
-    final FileInfo fileInfo = FileInfo.builder()
-                                      .type(AttestationType.UNKNOWN)
-                                      .status(AttestationStatus.UNKNOWN)
-                                      .filePath(filePath)
-                                      .relativeFilePath(relativeFilePath)
-                                      .lastModifiedTime(lastModifiedTime)
-                                      .fileHash(fileHash)
-                                      .build();
-    log.debug("getFileInfo() end, fileInfo={}", fileInfo);
-    return fileInfo;
-  }
-  
   @NonNull
-  private FileInfo checkAddedAndModified(@NonNull final FileInfo fileInfo) {
-    log.debug("checkAddedAndModified() start, fileInfo={}", fileInfo);
+  private FileInfo getFileInfo(@NonNull final Path filePath) throws ScanException, SQLException {
+    log.debug("getFileInfo() start, filePath={}", filePath);
+    final FileInfo fileInfo = new FileInfo();
+    fileInfo.setFilePath(filePath);
+    fileInfo.setRelativeFilePath(rootFolderPath.relativize(filePath));
+    try {
+      fileInfo.setLastModifiedTime(Files.getLastModifiedTime(filePath)
+                                        .toInstant()
+                                        .atZone(ZoneId.systemDefault())
+                                        .truncatedTo(ChronoUnit.MILLIS));
+    } catch (IOException e) {
+      throw new ScanException(e);
+    }
+    fileInfo.setFileHash(HashUtils.sha256(filePath.toFile()));
     final AttestationRecord previousRecord = attestationRecordService.findLastAttestedByRelativePath(
         fileInfo.getRelativeFilePath());
     if (previousRecord == null) {
@@ -197,47 +221,19 @@ public class AttestService {
         fileInfo.setStatus(AttestationStatus.ATTESTED);
       }
     }
-    log.debug("checkAddedAndModified() end, fileInfo={}", fileInfo);
+    log.debug("getFileInfo() end, fileInfo={}", fileInfo);
     return fileInfo;
   }
   
+  @NonNull
   private AttestationRecord attest(@NonNull final FileInfo fileInfo) {
     log.debug("attest() start, fileInfo={}", fileInfo);
-    final AttestationRecord attestationRecord = AttestationRecord.builder()
-                                                                 .type(fileInfo.getType())
-                                                                 .status(fileInfo.getStatus())
-                                                                 .filePath(fileInfo.getFilePath())
-                                                                 .relativeFilePath(fileInfo.getRelativeFilePath())
-                                                                 .lastModifiedTime(fileInfo.getLastModifiedTime())
-                                                                 .fileHash(fileInfo.getFileHash())
-                                                                 .previousRecord(fileInfo.getPreviousRecord())
-                                                                 .build();
+    final Cmd cmd = Cmd.of(fileInfo);
+    final AttestationRecord attestationRecord = AttestationRecord.of(fileInfo, cmd);
     try {
-      final ZonedDateTime attestTime = ZonedDateTime.now();
-      attestationRecord.setAttestTime(attestTime);
-      final Cmd cmd = Cmd.builder()
-                         .type(attestationRecord.getType())
-                         .fileName(attestationRecord.getFilePath()
-                                                    .getFileName()
-                                                    .toString())
-                         .lastModifiedTime(attestationRecord.getLastModifiedTimeLong())
-                         .fileHash(attestationRecord.getFileHash())
-                         .timestamp(attestationRecord.getAttestTimeLong())
-                         .description("")
-                         .build();
       final LedgerInputResponse ledgerInputResponse = bnsClient.ledgerInput(gson.toJson(cmd));
-      if (StatusConstantsString.OK.equalsIgnoreCase(ledgerInputResponse.getStatus())) {
-        attestationRecord.setStatus(AttestationStatus.ATTESTED);
-        attestationRecord.setAddress(ledgerInputResponse.getReceipt()
-                                                        .getCallerAddress());
-        attestationRecord.setClearanceOrder(ledgerInputResponse.getReceipt()
-                                                               .getClearanceOrder());
-        attestationRecord.setIndexValue(ledgerInputResponse.getReceipt()
-                                                           .getIndexValue());
-      } else {
-        attestationRecord.setStatus(AttestationStatus.FAIL);
-      }
-    } catch (Exception e) {
+      attestationRecord.updateByReceipt(ledgerInputResponse.getReceipt());
+    } catch (BnsClientException e) {
       log.error("attest() error", e);
       attestationRecord.setStatus(AttestationStatus.FAIL);
     }
@@ -245,23 +241,108 @@ public class AttestService {
     return attestationRecord;
   }
   
-  private void onAttested(@NonNull final AttestationRecord attestationRecord) {
-    log.debug("onAttested() attestationRecord={}", attestationRecord);
-    attestationRecordService.save(attestationRecord);
-    try {
-      callback.onAttested(attestationRecord);
-    } catch (Exception e) {
-      log.warn("onAttested() callback error", e);
+  @Override
+  public void register(RegisterRequest registerRequest, ClientInfo clientInfo) {
+    
+  }
+  
+  @Override
+  public void registerToBinding(RegisterToBindingRequest registerRequest, ClientInfo clientInfo) {
+    
+  }
+  
+  @Override
+  public void createLedgerInputByCmd(ReceiptLocator receiptLocator, LedgerInputRequest ledgerInputRequest) {
+    
+  }
+  
+  @Override
+  public void obtainLedgerInputResponse(ReceiptLocator locator, String cmdJson,
+      LedgerInputResponse ledgerInputResponse) {
+    
+  }
+  
+  @Override
+  public void obtainReceiptEvent(ReceiptEvent receiptEvent) {
+    
+  }
+  
+  @Override
+  public void obtainDoneClearanceOrderEvent(DoneClearanceOrderEvent doneClearanceOrderEvent) {
+    
+  }
+  
+  @Override
+  public void obtainMerkleProof(ReceiptLocator receiptLocator, MerkleProof merkleProof) {
+    
+  }
+  
+  @SneakyThrows({ CallbackException.class, SQLException.class })
+  @Override
+  public void getVerifyReceiptResult(Receipt receipt, MerkleProof merkleProof,
+      VerifyReceiptAndMerkleProofResult verifyReceiptAndMerkleProofResult) {
+    final AttestationRecord attestationRecord = attestationRecordService.findLastByCOAndIVAndStatus(
+        receipt.getClearanceOrder(), receipt.getIndexValue(), AttestationStatus.ATTESTED);
+    if (attestationRecord != null) {
+      if (attestationRecord.getPreviousRecord() != null) {
+        attestationRecord.setPreviousRecord(attestationRecordService.findById(attestationRecord.getPreviousRecord()
+                                                                                               .getId()));
+      }
+      handleVerifyResult(verifyReceiptAndMerkleProofResult, attestationRecord);
+      if (verifyReceiptAndMerkleProofResult.isPass() && config.isEnableDownloadVerificationProof()) {
+        handleSaveProof(attestationRecord);
+      }
+    } else {
+      log.error("onVerified() attestationRecord not found");
     }
   }
   
-  private void onAttestFail(@NonNull final AttestationRecord attestationRecord) {
-    log.debug("onAttestFail() attestationRecord={}", attestationRecord);
+  private void handleVerifyResult(@NonNull final VerifyReceiptAndMerkleProofResult verifyReceiptAndMerkleProofResult,
+      @NonNull final AttestationRecord attestationRecord) throws CallbackException, SQLException {
+    attestationRecord.setStatus(
+        verifyReceiptAndMerkleProofResult.isPass() ? AttestationStatus.VERIFIED : AttestationStatus.VERIFY_FAIL);
     attestationRecordService.save(attestationRecord);
+    if (verifyReceiptAndMerkleProofResult.isPass()) {
+      callback.onVerified(attestationRecord);
+    } else {
+      callback.onVerifyFail(attestationRecord);
+    }
+  }
+  
+  private void handleSaveProof(@NonNull final AttestationRecord attestationRecord)
+      throws CallbackException, SQLException {
     try {
-      callback.onAttestFail(attestationRecord);
-    } catch (Exception e) {
-      log.warn("onAttestFail() callback error", e);
+      final VerificationProof verificationProof = bnsClient.getVerificationProof(attestationRecord.getClearanceOrder(),
+          attestationRecord.getIndexValue());
+      String proofName;
+      Path proofPath;
+      int i = 0;
+      do {
+        proofName = String.format("%s_%d_%s%s.itm", attestationRecord.getFilePath()
+                                                                     .getFileName()
+                                                                     .toString(),
+            attestationRecord.getClearanceOrder(), attestationRecord.getIndexValue(), i == 0 ? "" : " (" + i + ")");
+        proofPath = Paths.get(config.getVerificationProofDownloadPath()
+                                    .toString(),
+            Optional.ofNullable(attestationRecord.getRelativeFilePath()
+                                                 .getParent())
+                    .map(Path::toString)
+                    .orElse(""),
+            proofName);
+        i++;
+      } while (Files.exists(proofPath));
+      Files.createDirectories(proofPath.getParent());
+      Files.write(proofPath, gson.toJson(verificationProof)
+                                 .getBytes(StandardCharsets.UTF_8));
+      attestationRecord.setStatus(AttestationStatus.SAVE_PROOF);
+      attestationRecord.setProofPath(proofPath);
+      attestationRecordService.save(attestationRecord);
+      callback.onSaveProof(attestationRecord);
+    } catch (BnsClientException | IOException e) {
+      log.error("getVerifyReceiptResult() error", e);
+      attestationRecord.setStatus(AttestationStatus.SAVE_FAIL);
+      attestationRecordService.save(attestationRecord);
+      callback.onSaveFail(attestationRecord);
     }
   }
   
