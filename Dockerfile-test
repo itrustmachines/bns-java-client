@@ -1,4 +1,0 @@
-FROM itm-registry.itm.monster/itm-java/maven-base:amd64 AS builder
-COPY . /bns-java-client
-WORKDIR /bns-java-client
-RUN mvn clean test

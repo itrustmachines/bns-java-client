@@ -38,6 +38,10 @@ To download the code, you will need to install [git](https://docs.github.com/en/
 
 Before you run the SDK, you need to add required packages to your computer if they are not already installed. Depending on your operating systems, enter the following commands in terminal. You may omit packages that are already installed but make sure your java version is higher than 8, you can type `java --version` in terminal to check.
 
+- java 11 or higher
+
+- maven 3.6.3 or higher
+
 - Please refer to [Java official website](https://www.oracle.com/java/technologies/javase-downloads.html) to install or upgrade the Java
 
 - Please refer to [Maven official website](https://maven.apache.org) to install or upgrade the Maven
